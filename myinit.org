@@ -1,0 +1,63 @@
+#+startup: overview
+* Keybinding
+#+begin_src emacs-lisp
+  (defun next-lines ()
+    (interactive)
+    (forward-line 5))
+
+  (defun previous-lines()
+    (interactive)
+    (forward-line -5))
+
+  (global-set-key (kbd "M-n") 'next-lines)
+  (global-set-key (kbd "M-p") 'previous-lines)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer)
+#+end_src
+* Init Setting
+#+begin_src emacs-lisp
+  ;; Increase garbage collection threshold to accelerate startup
+  (setq gc-cons-threshold 64000000)
+
+  ;; Auto-fill when current line is longer than 80 characters
+  (setq-default auto-fill-function 'do-auto-fill)
+  (setq-default fill-column 80)
+
+  ;; Change TAB key behavior to insert spaces instead
+  (setq-default indent-tabs-mode nil)
+  ;; Set number of spaces for c/c++ source file
+  (setq c-basic-offset 2)
+  ;; For a buffer-local variable, setq can only apply to current buffer,
+  ;; while setq-default can apply to all buffers.
+  (setq-default tab-width 4)
+
+  ;; Make the backspace properly erase the tab instead of
+  ;; removing 1 space at a time.
+  (setq backward-delete-char-untabify-method 'hungry)
+#+end_src
+#+begin_src emacs-lisp
+  ;; Load solarized theme
+  (add-to-list 'custom-theme-load-path
+    "~/.emacs.d/site-lisp/emacs-color-theme-solarized")
+  (load-theme 'solarized t)
+  (add-hook 'after-init-hook
+    (lambda ()
+      (if (display-graphic-p)
+        ;; GUI
+        (set-frame-parameter nil 'background-mode 'light)
+        ;; Terminal
+        (set-terminal-parameter nil 'background-mode 'dark))
+      (enable-theme 'solarized)))
+
+  ;; Remove extra whitespaces
+  (add-hook 'before-save-hook (lambda () (whitespace-cleanup)))
+
+  ;; Display column number
+  (setq column-number-mode t)
+
+  ;; Add a value to 'load-path'
+  (add-to-list 'load-path "~/.emacs.d/site-lisp")
+
+  ;; Multi-term
+  (require 'multi-term)
+  (setq multi-term-program "/bin/bash")
+#+end_src
