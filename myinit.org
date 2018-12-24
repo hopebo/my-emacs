@@ -1,4 +1,3 @@
-#+startup: overview
 * Keybinding
 #+begin_src emacs-lisp
   (defun next-lines ()
@@ -33,6 +32,9 @@
   ;; Make the backspace properly erase the tab instead of
   ;; removing 1 space at a time.
   (setq backward-delete-char-untabify-method 'hungry)
+
+  ;; Prevent emacs from making backup files
+  (setq make-backup-files nil)
 #+end_src
 #+begin_src emacs-lisp
   ;; Load solarized theme
@@ -48,11 +50,11 @@
         (set-terminal-parameter nil 'background-mode 'dark))
       (enable-theme 'solarized)))
 
-  ;; Remove extra whitespaces
-  (add-hook 'before-save-hook (lambda () (whitespace-cleanup)))
-
-  ;; Display column number
-  (setq column-number-mode t)
+  ;; Remove trailing whitespaces
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  ;; More powerful automatic adjustments according to whitespace-style
+  ;; variable, which may influence leading whitespaces.
+  ;; (add-hook 'before-save-hook 'whitespace-cleanup)
 
   ;; Add a value to 'load-path'
   (add-to-list 'load-path "~/.emacs.d/site-lisp")
@@ -60,4 +62,110 @@
   ;; Multi-term
   (require 'multi-term)
   (setq multi-term-program "/bin/bash")
+#+end_src
+* Interface Tweak
+#+begin_src emacs-lisp
+  ;; Use y-n instead of yes-no
+  (fset 'yes-or-no-p 'y-or-n-p)
+
+  ;; Display column number
+  (setq column-number-mode t)
+
+  ;; Ignore ring-bell-function
+  (setq ring-bell-function 'ignore)
+
+  ;; Put an newline at end of file if it doesn't exist
+  ;; Newline character is regard as the end of each line, and
+  ;; it may cause header file including error without it.
+  (setq require-final-newline t)
+
+  ;; Highlight cursor line
+  (global-hl-line-mode t)
+
+  ;; Highlight trailing whitespaces and exceeding part
+  ;; when lines are longer than whitespace-line-column
+  (setq-default show-trailing-whitespace t)
+  (setq whitespace-style '(face trailing tabs lines-tail))
+  (global-whitespace-mode t)
+
+#+end_src
+* Ibuffer
+#+begin_src emacs-lisp
+  (require 'ibuffer)
+
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+
+  ;; Define buffer groups
+  (setq ibuffer-saved-filter-groups
+    (quote (("default"
+            ("dired" (mode . dired-mode))
+            ("emacs" (or
+                     (name . "^\\*scratch\\*$")
+                     (name . "^\\*Messages\\*$")))
+            ("programming" (or
+                           (mode . python-mode)
+                           (mode . c++-mode)
+                           (mode . c-mode)
+                           (mode . perl-mode)
+                           (mode . python-mode)
+                           (mode . emacs-lisp-mode)))
+            ("shell" (or
+                     (mode . shell-mode)
+                     (mode . eshell-mode)))
+            ("gnus" (or
+                    (mode . message-mode)
+                    (mode . bbdb-mode)
+                    (mode . mail-mode)
+                    (mode . gnus-group-mode)
+                    (mode . gnus-summary-mode)
+                    (mode . gnus-article-mode)
+                    (name . "^\\.bbdb$")
+                    (name . "^\\.newsrc-dribble")))))))
+
+  (add-hook 'ibuffer-mode-hook
+    (lambda ()
+      (ibuffer-switch-to-saved-filter-groups "default")))
+
+  ;; Stop showing groups in which there is no buffer
+  (setq ibuffer-show-empty-filter-groups nil)
+
+  ;; Do not ask for confirmation when deleting marked buffers
+  (setq ibuffer-expert t)
+
+  ;; Use human readable Size column instead of original one
+  (define-ibuffer-column size-h
+    (:name "Size" :inline t)
+    (cond
+      ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+      ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+      ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+      (t (format "%8d" (buffer-size)))))
+
+  ;; Modify the default ibuffer-formats
+  (setq ibuffer-formats
+    '((mark modified read-only " "
+      (name 18 18 :left :nil)
+      " "
+      (size-h 9 -1 :right)
+      " "
+      (mode 16 16 :left :elide)
+      " "
+      filename-and-process)))
+#+end_src
+* Package Archives
+#+begin_src emacs-lisp
+  (require 'package)
+  (setq package-archives '(("gnu" . "http://elpa.emacs-china.org/gnu/")
+                           ("melpa" . "http://elpa.emacs-china.org/melpa/")
+                           ("org" . "http://elpa.emacs-china.org/org/")))
+
+  ;; Disable automatically loading after processing the init file
+  (setq package-enable-at-startup nil)
+
+  ;; Avoid automatically adding (package-initialize) to the init file
+  (setq package--init-file-ensured t)
+#+end_src
+* Use-package
+#+begin_src emacs-lisp
+
 #+end_src
