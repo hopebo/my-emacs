@@ -238,3 +238,104 @@
     (setq company-show-numbers t)
     (global-company-mode))
 #+end_src
+* C++
+** Basic C/C++
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.ic\\'" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.yy\\'" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+
+  ;; Syntax highlight for latest C++
+  (use-package modern-cpp-font-lock
+    :ensure t
+    :config
+    (modern-c++-font-lock-global-mode t))
+
+  ;; Clang-format
+  ;; Function: clang-format-region, clang-format-buffer
+  (use-package clang-format
+    :ensure t)
+
+  ;; Google c/c++ style
+  (use-package google-c-style
+    :ensure t
+    :config
+    (add-hook 'c-mode-common-hook 'google-set-c-style)
+    (add-hook 'c-mode-common-hook 'google-make-newline-indent))
+#+end_src
+** Code navigation
+#+begin_src emacs-lisp
+  (use-package xcscope
+    :ensure t
+    :config
+    (setq cscope-program "gtags-cscope")
+    (add-to-list 'cscope-indexer-suffixes "*.ic")
+    (add-to-list 'cscope-indexer-suffixes "*.yy")
+    (add-to-list 'cscope-indexer-suffixes "*.x")
+    (cscope-setup))
+
+  (use-package ggtags
+    :ensure t
+    :config (add-hook 'c-mode-common-hook
+              (lambda ()
+                (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+                  (ggtags-mode 1)))))
+#+end_src
+** CMake mode
+#+begin_src emacs-lisp
+  (use-package cmake-mode
+    :ensure t)
+#+end_src
+** Irony
+#+begin_src emacs-lisp
+  ;; Auto-completition
+  (use-package irony
+    :ensure t
+    :config
+    (use-package irony-cdb)
+    (add-hook 'c++-mode-hook 'irony-mode)
+    (add-hook 'c-mode-hook 'irony-mode)
+    (add-hook 'objc-mode-hook 'irony-mode)
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+
+  ;; Company-irony
+  (use-package company-irony
+    :ensure t
+    :requires (company irony)
+    :config
+    (eval-after-load 'company
+      '(add-to-list 'company-backends 'company-irony)))
+
+  ;; Flycheck-irony
+  (use-package flycheck-irony
+    :ensure t
+    :requires (flycheck irony)
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+
+  ;; Irony-eldoc
+  (use-package irony-eldoc
+    :ensure t
+    :requires (irony)
+    :config
+    (add-hook 'irony-mode-hook #'irony-eldoc))
+#+end_src
+* Avy
+#+begin_comment
+Quickly jump to the position on screen beginning with specific character.
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package avy
+    :ensure t
+    :bind (("M-g w" . avy-goto-word-1)))
+#+end_src
+* Other language modes
+#+begin_src emacs-lisp
+  ;; Json
+  (use-package json-mode
+    :ensure t)
+
+  ;; Markdown
+  (use-package markdown-mode
+    :ensure t)
+#+end_src
