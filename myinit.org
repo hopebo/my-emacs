@@ -276,10 +276,11 @@
 
   (use-package ggtags
     :ensure t
-    :config (add-hook 'c-mode-common-hook
-              (lambda ()
-                (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-                  (ggtags-mode 1)))))
+    :config
+    (add-hook 'c-mode-common-hook
+      (lambda ()
+        (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+          (ggtags-mode 1)))))
 #+end_src
 ** CMake mode
 #+begin_src emacs-lisp
@@ -307,13 +308,17 @@
       '(add-to-list 'company-backends 'company-irony)))
 
   ;; Flycheck-irony
+  ;; May have some strange behaviors, then comment this.
   (use-package flycheck-irony
     :ensure t
     :requires (flycheck irony)
     :config
-    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+    (eval-after-load 'flycheck
+      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
 
   ;; Irony-eldoc
+  ;; Display documentation about a symbol or function call at point
+  ;; in the message buffer
   (use-package irony-eldoc
     :ensure t
     :requires (irony)
@@ -328,6 +333,102 @@ Quickly jump to the position on screen beginning with specific character.
   (use-package avy
     :ensure t
     :bind (("M-g w" . avy-goto-word-1)))
+#+end_src
+* Yasnippet
+#+begin_comment
+A template system for Emacs. It allows you to type an abbreviation and
+automatically expand it into function templates.
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :ensure t
+    :config
+    (yas-global-mode 1))
+
+  (use-package yasnippet-snippets
+    :ensure t)
+#+end_src
+* Reveal.js
+#+begin_comment
+The HTML presentation framework. Presentations can be exported
+from Org documents by Org-Reveal
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package ox-reveal
+    :ensure t
+    :config
+    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
+    (setq org-reveal-mathjax t))
+
+  (use-package htmlize
+    :ensure t)
+#+end_src
+* Iedit
+#+begin_comment
+Mark and edit multiple copies simultaniously.
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package iedit
+    :ensure t)
+#+end_src
+* Web mode
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.vue?\\'" . web-mode))
+    (setq web-mode-engines-alist
+      '(("php" . "\\.phtml\\'")
+        ("blade" . "\\.blade\\.")))
+    (setq web-mode-ac-sources-alist
+      '(("css" . (ac-source-css-property))
+        ("vue" . (ac-source-words-in-buffer ac-source-abbrev))
+        ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
+    (setq web-mode-enable-auto-closing t)
+    (setq web-mode-enable-auto-quoting t))
+#+end_src
+* Git
+** Magit
+#+begin_comment
+Git operations in emacs
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t
+    :bind (("C-x g" . magit-status))
+    :config
+    (setq magit-completing-read-function 'ivy-completing-read))
+#+end_src
+** Git gutter
+#+begin_src emacs-lisp
+  (use-package git-gutter
+    :ensure t
+    :bind (("C-x C-g" . git-gutter-mode)
+           ("C-x v =" . git-gutter:popup-hunk)
+           ("C-x p" . git-gutter:previous-hunk)
+           ("C-x n" . git-gutter:next-hunk)
+           ("C-x v s" . git-gutter:stage-hunk)
+           ("C-x v r" . git-gutter:revert-hunk))
+    :config
+    (setq git-gutter:modified-sign "=")
+    (setq git-gutter:added-sign "+")
+    (setq git-gutter:deleted-sign "-")
+    (set-face-foreground 'git-gutter:modified "yellow")
+    (set-face-foreground 'git-gutter:added "green")
+    (set-face-foreground 'git-gutter:deleted "red"))
+#+end_src
+** Git timemachine
+#+begin_src emacs-lisp
+  (use-package git-timemachine
+    :ensure t)
 #+end_src
 * Other language modes
 #+begin_src emacs-lisp
