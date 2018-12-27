@@ -21,20 +21,6 @@
 
   ;; Prevent emacs from making backup files
   (setq make-backup-files nil)
-#+end_src
-#+begin_src emacs-lisp
-  ;; Load solarized theme
-  (add-to-list 'custom-theme-load-path
-    "~/.emacs.d/site-lisp/emacs-color-theme-solarized")
-  (load-theme 'solarized t)
-  (add-hook 'after-init-hook
-    (lambda ()
-      (if (display-graphic-p)
-        ;; GUI
-        (set-frame-parameter nil 'background-mode 'light)
-        ;; Terminal
-        (set-terminal-parameter nil 'background-mode 'dark))
-      (enable-theme 'solarized)))
 
   ;; Remove trailing whitespaces
   (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -44,10 +30,6 @@
 
   ;; Add a value to 'load-path'
   (add-to-list 'load-path "~/.emacs.d/site-lisp")
-
-  ;; Multi-term
-  (require 'multi-term)
-  (setq multi-term-program "/bin/bash")
 #+end_src
 * Keybinding
 #+begin_src emacs-lisp
@@ -62,6 +44,12 @@
   (global-set-key (kbd "M-n") 'next-lines)
   (global-set-key (kbd "M-p") 'previous-lines)
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
+#+end_src
+* Common
+#+begin_src emacs-lisp
+  ;; Diasble show-trailing-whitespace
+  (defun disable-show-trailing-whitespace ()
+    (setq show-trailing-whitespace nil))
 #+end_src
 * Interface Tweak
 #+begin_src emacs-lisp
@@ -86,14 +74,10 @@
   ;; when lines are longer than whitespace-line-column
   (setq-default show-trailing-whitespace t)
 
-  ;; Diasble show-trailing-whitespace in minibuffer
-  (defun minibuffer-setup ()
-    (setq show-trailing-whitespace nil))
-  (add-hook 'minibuffer-setup-hook 'minibuffer-setup)
+  (add-hook 'minibuffer-setup-hook 'disable-show-trailing-whitespace)
 
   (setq whitespace-style '(face trailing tabs lines-tail))
   (global-whitespace-mode t)
-
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -107,6 +91,7 @@
             ("dired" (mode . dired-mode))
             ("emacs" (or
                      (name . "^\\*scratch\\*$")
+                     (name . "^\\*Help\\*$")
                      (name . "^\\*Messages\\*$")))
             ("programming" (or
                            (mode . python-mode)
@@ -116,8 +101,13 @@
                            (mode . python-mode)
                            (mode . emacs-lisp-mode)))
             ("shell" (or
+                     (mode . term-mode)
                      (mode . shell-mode)
                      (mode . eshell-mode)))
+            ("git" (or
+                   (mode . diff-mode)
+                   (name . "^magit.*")
+                   (name . ".gitignore")))
             ("gnus" (or
                     (mode . message-mode)
                     (mode . bbdb-mode)
@@ -134,6 +124,9 @@
 
   ;; Stop showing groups in which there is no buffer
   (setq ibuffer-show-empty-filter-groups nil)
+
+  ;; Hide the last two summary lines
+  (setq ibuffer-display-summary nil)
 
   ;; Do not ask for confirmation when deleting marked buffers
   (setq ibuffer-expert t)
@@ -182,7 +175,12 @@
   (eval-when-compile
     (require 'use-package))
 #+end_src
-* Undo tree
+* Hydra
+#+begin_src emacs-lisp
+  (use-package hydra
+    :ensure t)
+#+end_src
+* Undo Tree
 #+begin_src emacs-lisp
   (use-package undo-tree
     :ensure t
@@ -192,21 +190,23 @@
     :config
     (global-undo-tree-mode))
 #+end_src
-* Which key
+* Which Key
 #+begin_src emacs-lisp
   (use-package which-key
     :ensure t
     :config
     (which-key-mode))
 #+end_src
-* Ace window
+* Ace Window
 #+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
-    :bind (([remap other-window] . 'ace-window))
+    :bind (("M-o" . 'ace-window))
     :config
     (setq aw-scope 'frame)
-    (setq aw-background nil))
+    (setq aw-background nil)
+    (setq aw-dispatch-always t)
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+end_src
 * Ivy, Swiper, Counsel
 #+begin_src emacs-lisp
@@ -430,7 +430,138 @@ Git operations in emacs
   (use-package git-timemachine
     :ensure t)
 #+end_src
-* Other language modes
+* Ansi-term
+#+begin_src emacs-lisp
+  (defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
+    (if (memq (process-status proc) '(signal exit))
+      (let ((buffer (process-buffer proc))) ad-do-it (kill-buffer buffer))
+        ad-do-it))
+
+  (ad-activate 'term-sentinel)
+
+  (defvar term-shell "/bin/bash")
+
+  (defadvice ansi-term (before force-bash)
+    (interactive (list term-shell)))
+
+  (ad-activate 'ansi-term)
+
+  (defun term-paste (&optional string)
+    (interactive)
+    (process-send-string (get-buffer-process (current-buffer))
+      (if string string (current-kill 0))))
+
+  (defun term-hook ()
+    (goto-address-mode)
+    (define-key term-raw-map "\C-y" 'term-paste))
+
+  (add-hook 'term-mode-hook 'term-hook)
+  (add-hook 'term-mode-hook 'disable-show-trailing-whitespace)
+#+end_src
+* Dumb Jump
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :ensure t
+    :bind (("M-g j" . dumb-jump-go)
+           ("M-g b" . dumb-jump-back)
+           ("M-g o" . dumb-jump-go-other-window)
+           ("M-g x" . dumb-jump-go-prefer-external)
+           ("M-g z" . dumb-jump-go-prefer-external-other-window))
+    :config
+    (setq dumb-jump-selector 'ivy)
+    (dumb-jump-mode))
+#+end_src
+* Origami
+#+begin_src emacs-lisp
+  (use-package origami
+    :ensure t)
+#+end_src
+* Projectile
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :config
+    (projectile-global-mode)
+    (setq projectile-completion-system 'ivy))
+#+end_src
+* Smartparens
+#+begin_src emacs-lisp
+  (use-package smartparens
+    :ensure t
+    :config
+    (use-package smartparens-config)
+    (use-package smartparens-html)
+    (use-package smartparens-python)
+    (smartparens-global-mode t)
+    (show-smartparens-global-mode t))
+#+end_src
+* Text Scale
+#+begin_src emacs-lisp
+  (use-package default-text-scale
+    :ensure t
+    :config
+    (global-set-key (kbd "C-M-=") 'default-text-scale-increase)
+    (global-set-key (kbd "C-M--") 'default-text-scale-decrease))
+#+end_src
+* Treemacs
+#+begin_src emacs-lisp
+  (use-package treemacs
+    :ensure t
+    :defer t
+    :config
+    (progn
+      (setq treemacs-follow-after-init          t
+            treemacs-width                      35
+            treemacs-indentation                2
+            treemacs-git-integration            t
+            treemacs-collapse-dirs              3
+            treemacs-silent-refresh             nil
+            treemacs-change-root-without-asking nil
+            treemacs-sorting                    'alphabetic-desc
+            treemacs-show-hidden-files          t
+            treemacs-never-persist              nil
+            treemacs-is-never-other-window      nil
+            treemacs-goto-tag-strategy          'refetch-index)
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t))
+    :bind
+    (:map global-map
+      ("C-x t" . treemacs)))
+
+  (use-package treemacs-projectile
+    :defer t
+    :ensure t
+    :config
+    (setq treemacs-header-function #'treemacs-projectile-create-header))
+#+end_src
+* Multiple Cursors
+#+begin_src emacs-lisp
+  ;; mc/cmds-to-run-once and mc/cmds-to-run-for-all will be cached in
+  ;; local file. When multiple cursors run a new command, it will ask about it.
+  (use-package multiple-cursors
+    :ensure t
+    :requires (hydra)
+    :config
+    (global-set-key (kbd "M-g e")
+      (defhydra hydra-multiple-cursors (:color pink)
+        "Multiple Cursors"
+        ("w" mc/mark-all-words-like-this "All Words" :exit t)
+        ("c" mc/mark-all-like-this "All Like This")
+        ("n" mc/mark-next-like-this "Next")
+        ("M-n" mc/unmark-next-like-this "Unmark Next")
+        ("N" mc/skip-to-next-like-this "Skip Next")
+        ("p" mc/mark-previous-like-this "Previous")
+        ("M-p" mc/unmark-previous-like-this "Unmark Previous")
+        ("P" mc/skip-to-previous-like-this "Skip Previous")
+        ("$" mc/mark-all-in-region "Prompts")
+        ("l" mc/edit-lines "Lines")
+        ("b" mc/edit-beginnings-of-lines "Begin of Lines")
+        ("e" mc/edit-ends-of-lines "End of Lines")
+        ("q" nil "Exit"))))
+#+end_src
+* Other Language Modes
 #+begin_src emacs-lisp
   ;; Json
   (use-package json-mode
@@ -439,4 +570,32 @@ Git operations in emacs
   ;; Markdown
   (use-package markdown-mode
     :ensure t)
+#+end_src
+* Other Manually Packages
+** Browse Kill Ring
+#+begin_src emacs-lisp
+  (require 'browse-kill-ring)
+  (global-set-key (kbd "M-y") 'browse-kill-ring)
+#+end_src
+** Solarized Theme
+#+begin_src emacs-lisp
+  ;; Load solarized theme
+  (add-to-list 'custom-theme-load-path
+    "~/.emacs.d/site-lisp/emacs-color-theme-solarized")
+  (load-theme 'solarized t)
+  (add-hook 'after-init-hook
+    (lambda ()
+      (if (display-graphic-p)
+        ;; GUI
+        (set-frame-parameter nil 'background-mode 'light)
+        ;; Terminal
+        (set-terminal-parameter nil 'background-mode 'dark))
+      (enable-theme 'solarized)))
+#+end_src
+** Smart Mode Line
+#+begin_src emacs-lisp
+  (require 'smart-mode-line)
+  (setq sml/no-confirm-load-theme t)
+  (setq sml/theme 'respectful)
+  (sml/setup)
 #+end_src

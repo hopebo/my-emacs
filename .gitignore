@@ -3,3 +3,6 @@ myinit.el
 elpa/*
 recentf
 irony/*
+.cache/*
+.mc-lists.el
+projectile-bookmarks.eld
