@@ -594,6 +594,9 @@ Git operations in emacs
 #+end_src
 ** Smart Mode Line
 #+begin_src emacs-lisp
+  ;; smart-mode-line's dependency
+  (use-package rich-minority
+    :ensure t)
   (require 'smart-mode-line)
   (setq sml/no-confirm-load-theme t)
   (setq sml/theme 'respectful)
