@@ -212,13 +212,23 @@
 #+begin_src emacs-lisp
   (use-package ivy
     :ensure t
-    :bind (("C-s" . 'swiper)
-           ("<f2> u" . 'counsel-unicode-char)
-           ("<f2> i" . 'counsel-info-lookup-symbol))
     :config
     (setq ivy-use-virtual-buffers t)
     (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-initial-inputs-alist nil)
     (ivy-mode t))
+
+  (use-package swiper
+    :ensure t
+    :bind (("C-s" . 'swiper)
+           ("C-r" . 'swiper)))
+
+  (use-package counsel
+    :ensure t
+    :bind (("<f2> u" . 'counsel-unicode-char)
+           ("<f2> i" . 'counsel-info-lookup-symbol))
+    :config
+    (counsel-mode t))
 #+end_src
 * Flycheck
 #+begin_src emacs-lisp
@@ -385,6 +395,7 @@ Mark and edit multiple copies simultaniously.
     (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.vue?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
     (setq web-mode-engines-alist
       '(("php" . "\\.phtml\\'")
         ("blade" . "\\.blade\\.")))
@@ -394,6 +405,14 @@ Mark and edit multiple copies simultaniously.
         ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
     (setq web-mode-enable-auto-closing t)
     (setq web-mode-enable-auto-quoting t))
+
+  ;; Adjust indents for web-mode
+  (defun web-mode-indent-hook ()
+    "Hooks for web mode to adjust indents"
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2))
+  (add-hook 'web-mode-hook 'web-mode-indent-hook)
 #+end_src
 * Git
 ** Magit
@@ -560,6 +579,42 @@ Git operations in emacs
         ("b" mc/edit-beginnings-of-lines "Begin of Lines")
         ("e" mc/edit-ends-of-lines "End of Lines")
         ("q" nil "Exit"))))
+#+end_src
+* Javascript
+#+begin_src emacs-lisp
+  (use-package js2-mode
+    :ensure t
+    :ensure ac-js2
+    :config
+    (add-hook 'js-mode-hook 'js2-minor-mode)
+    (add-to-list 'company-backends 'ac-js2-company))
+
+  (use-package js2-refactor
+    :ensure t
+    :config
+    (js2r-add-keybindings-with-prefix "C-c C-m")
+    (add-hook 'js2-mode-hook #'js2-refactor-mode))
+
+  (use-package tern
+    :ensure t
+    :ensure tern-auto-complete
+    :config
+    (add-hook 'js-mode-hook (lambda () (tern-mode t)))
+    (add-hook 'js2-mode-hook (lambda () (tern-mode t)))
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode)))
+
+  (use-package simple-httpd
+    :ensure t
+    :config
+    (setq httpd-root "/var/www"))
+
+  (use-package skewer-mode
+    :ensure t
+    :requires (js2-mode simple-httpd)
+    :config
+    (add-hook 'js2-mode-hook 'skewer-mode)
+    (add-hook 'css-mode-hook 'skewer-css-mode)
+    (add-hook 'html-mode-hook 'skewer-html-mode))
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
