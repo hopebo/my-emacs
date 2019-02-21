@@ -396,6 +396,7 @@ Mark and edit multiple copies simultaniously.
     (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.vue?\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.ejs\\'" . web-mode))
     (setq web-mode-engines-alist
       '(("php" . "\\.phtml\\'")
         ("blade" . "\\.blade\\.")))
@@ -409,10 +410,15 @@ Mark and edit multiple copies simultaniously.
   ;; Adjust indents for web-mode
   (defun web-mode-indent-hook ()
     "Hooks for web mode to adjust indents"
-    (setq web-mode-markup-indent-offset 2)
-    (setq web-mode-css-indent-offset 2)
-    (setq web-mode-code-indent-offset 2))
+    (setq web-mode-markup-indent-offset 4)
+    (setq web-mode-css-indent-offset 4)
+    (setq web-mode-code-indent-offset 4))
   (add-hook 'web-mode-hook 'web-mode-indent-hook)
+
+  (add-hook 'html-mode-hook
+    (lambda ()
+    ;; Default indentation is usually 2 spaces, changing to 4.
+    (set (make-local-variable 'sgml-basic-offset) 4)))
 #+end_src
 * Git
 ** Magit
