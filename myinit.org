@@ -381,7 +381,7 @@ Mark and edit multiple copies simultaniously.
   (use-package iedit
     :ensure t)
 #+end_src
-* Web mode
+* Web Mode
 #+begin_src emacs-lisp
   (use-package web-mode
     :ensure t
@@ -621,6 +621,12 @@ Git operations in emacs
     (add-hook 'js2-mode-hook 'skewer-mode)
     (add-hook 'css-mode-hook 'skewer-css-mode)
     (add-hook 'html-mode-hook 'skewer-html-mode))
+#+end_src
+* Org Mode
+#+begin_src emacs-lisp
+  ;; Load markdown exporter
+  (eval-after-load "org"
+    '(require 'ox-md nil t))
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
