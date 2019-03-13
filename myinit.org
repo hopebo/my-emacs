@@ -76,7 +76,8 @@
 
   (add-hook 'minibuffer-setup-hook 'disable-show-trailing-whitespace)
 
-  (setq whitespace-style '(face trailing tabs lines-tail))
+  (setq whitespace-style '(face tabs trailing lines space-before-tab
+    indentation empty space-after-tab tab-mark))
   (global-whitespace-mode t)
 #+end_src
 * Ibuffer
@@ -278,7 +279,7 @@
   (use-package xcscope
     :ensure t
     :config
-    (setq cscope-program "gtags-cscope")
+    (setq cscope-program "cscope")
     (add-to-list 'cscope-indexer-suffixes "*.ic")
     (add-to-list 'cscope-indexer-suffixes "*.yy")
     (add-to-list 'cscope-indexer-suffixes "*.x")
@@ -624,6 +625,10 @@ Git operations in emacs
 #+end_src
 * Org Mode
 #+begin_src emacs-lisp
+  ;; Org preview HTML mode
+  (use-package org-preview-html
+    :ensure t)
+
   ;; Load markdown exporter
   (eval-after-load "org"
     '(require 'ox-md nil t))
