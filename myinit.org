@@ -632,6 +632,17 @@ Git operations in emacs
   ;; Load markdown exporter
   (eval-after-load "org"
     '(require 'ox-md nil t))
+
+  (defun edit-mode ()
+    (auto-fill-mode -1)
+    (setq whitespace-line-column 20000))
+
+  (add-hook 'org-mode-hook 'edit-mode)
+
+  (add-hook 'org-mode-hook
+    (lambda ()
+      (toggle-truncate-lines)
+      (org-preview-html-mode)))
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
@@ -641,7 +652,11 @@ Git operations in emacs
 
   ;; Markdown
   (use-package markdown-mode
-    :ensure t)
+    :ensure t
+    :config
+    ;; Use pandoc to do markdown preview(C-c C-c p).
+    (setq markdown-command "/usr/local/bin/pandoc")
+    (add-hook 'markdown-mode-hook 'edit-mode))
 #+end_src
 * Other Manually Packages
 ** Browse Kill Ring
