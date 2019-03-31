@@ -3,10 +3,6 @@
   ;; Increase garbage collection threshold to accelerate startup
   (setq gc-cons-threshold 64000000)
 
-  ;; Auto-fill when current line is longer than 80 characters
-  (setq-default auto-fill-function 'do-auto-fill)
-  (setq-default fill-column 80)
-
   ;; Change TAB key behavior to insert spaces instead
   (setq-default indent-tabs-mode nil)
   ;; Set number of spaces for c/c++ source file
@@ -47,9 +43,25 @@
 #+end_src
 * Common
 #+begin_src emacs-lisp
-  ;; Diasble show-trailing-whitespace
-  (defun disable-show-trailing-whitespace ()
-    (setq show-trailing-whitespace nil))
+  ;; Coding mode configurations
+  (defun coding-mode()
+    ;; Highlight trailing whitespaces and exceeding part
+    ;; when lines are longer than whitespace-line-column
+    (setq show-trailing-whitespace t)
+    ;; Auto-fill when current line is longer than 80 characters
+    (setq fill-column 80)
+    (setq auto-fill-function 'do-auto-fill)
+    (whitespace-mode t))
+
+  (defun add-multiple-hooks (hook-function hooks)
+    (mapc (lambda (hook) (add-hook hook hook-function)) hooks))
+
+  (add-multiple-hooks 'coding-mode
+    '(sh-mode-hook
+      c-mode-hook
+      c++-mode-hook
+      python-mode-hook
+      magit-mode-hook))
 #+end_src
 * Interface Tweak
 #+begin_src emacs-lisp
@@ -70,15 +82,8 @@
   ;; Highlight cursor line
   (global-hl-line-mode t)
 
-  ;; Highlight trailing whitespaces and exceeding part
-  ;; when lines are longer than whitespace-line-column
-  (setq-default show-trailing-whitespace t)
-
-  (add-hook 'minibuffer-setup-hook 'disable-show-trailing-whitespace)
-
   (setq whitespace-style '(face tabs trailing lines space-before-tab
     indentation empty space-after-tab tab-mark))
-  (global-whitespace-mode t)
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -102,9 +107,14 @@
                            (mode . python-mode)
                            (mode . emacs-lisp-mode)))
             ("shell" (or
+                     (mode . sh-mode)
                      (mode . term-mode)
                      (mode . shell-mode)
                      (mode . eshell-mode)))
+            ("edit" (or
+                    (mode . org-mode)
+                    (mode . markdown-mode)
+                    (mode . text-mode)))
             ("git" (or
                    (mode . diff-mode)
                    (name . "^magit.*")
@@ -482,7 +492,6 @@ Git operations in emacs
     (define-key term-raw-map "\C-y" 'term-paste))
 
   (add-hook 'term-mode-hook 'term-hook)
-  (add-hook 'term-mode-hook 'disable-show-trailing-whitespace)
 #+end_src
 * Dumb Jump
 #+begin_src emacs-lisp
@@ -627,22 +636,24 @@ Git operations in emacs
 #+begin_src emacs-lisp
   ;; Org preview HTML mode
   (use-package org-preview-html
-    :ensure t)
+    :ensure t
+    :bind (("C-c t" . org-preview-html-mode)))
 
   ;; Load markdown exporter
   (eval-after-load "org"
     '(require 'ox-md nil t))
 
-  (defun edit-mode ()
-    (auto-fill-mode -1)
-    (setq whitespace-line-column 20000))
-
-  (add-hook 'org-mode-hook 'edit-mode)
-
   (add-hook 'org-mode-hook
     (lambda ()
       (toggle-truncate-lines)
-      (org-preview-html-mode)))
+      (org-indent-mode)
+      (setq org-log-done 'time)))
+
+  (setq org-todo-keywords
+      '((sequence "TODO" "PROGRESS" "|" "DONE" "ABANDONED")))
+
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c h") 'counsel-org-entity)
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
@@ -655,8 +666,7 @@ Git operations in emacs
     :ensure t
     :config
     ;; Use pandoc to do markdown preview(C-c C-c p).
-    (setq markdown-command "/usr/local/bin/pandoc")
-    (add-hook 'markdown-mode-hook 'edit-mode))
+    (setq markdown-command "/usr/local/bin/pandoc"))
 #+end_src
 * Other Manually Packages
 ** Browse Kill Ring
