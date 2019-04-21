@@ -60,8 +60,7 @@
     '(sh-mode-hook
       c-mode-hook
       c++-mode-hook
-      python-mode-hook
-      magit-mode-hook))
+      python-mode-hook))
 #+end_src
 * Interface Tweak
 #+begin_src emacs-lisp
@@ -119,6 +118,13 @@
                    (mode . diff-mode)
                    (name . "^magit.*")
                    (name . ".gitignore")))
+            ("gdb" (or
+                       (mode . gdb-frames-mode)
+                       (mode . gdb-inferior-io-mode)
+                       (mode . gdb-breakpoints-mode)
+                       (mode . gud-mode)
+                       (mode . gdb-threads-mode)
+                       (mode . gdb-locals-mode)))
             ("gnus" (or
                     (mode . message-mode)
                     (mode . bbdb-mode)
@@ -654,6 +660,16 @@ Git operations in emacs
 
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c h") 'counsel-org-entity)
+#+end_src
+* Gdb
+#+begin_src emacs-lisp
+  ;; Enable mouse support
+  (add-hook 'gud-mode-hook (lambda ()
+            (setq gdb-show-main t)
+            (xterm-mouse-mode t)
+            (global-display-line-numbers-mode t)
+            (global-set-key (kbd "<left-margin> <S-mouse-3>") 'gdb-mouse-until)
+            (global-set-key (kbd "<left-margin> <S-mouse-1>") 'gdb-mouse-toggle-breakpoint-margin)))
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
