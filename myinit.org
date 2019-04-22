@@ -39,6 +39,14 @@
 
   (global-set-key (kbd "M-n") 'next-lines)
   (global-set-key (kbd "M-p") 'previous-lines)
+
+  ;; Revert buffer from disk
+  (defun refresh-file ()
+    (interactive)
+    (revert-buffer t (not (buffer-modified-p)) t))
+
+  (global-set-key (kbd "<f5>") 'refresh-file)
+
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
 #+end_src
 * Common
