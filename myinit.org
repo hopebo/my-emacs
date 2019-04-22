@@ -674,10 +674,12 @@ Git operations in emacs
   ;; Enable mouse support
   (add-hook 'gud-mode-hook (lambda ()
             (setq gdb-show-main t)
-            (xterm-mouse-mode t)
             (global-display-line-numbers-mode t)
             (global-set-key (kbd "<left-margin> <S-mouse-3>") 'gdb-mouse-until)
             (global-set-key (kbd "<left-margin> <S-mouse-1>") 'gdb-mouse-toggle-breakpoint-margin)))
+
+  ;; Disable company-mode for it takes lots of time reading symbols from executable file and generating candidates.
+  (add-hook 'gud-mode-hook (lambda () (company-mode -1)))
 #+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
