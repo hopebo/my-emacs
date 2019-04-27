@@ -48,6 +48,8 @@
   (global-set-key (kbd "<f5>") 'refresh-file)
 
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
+
+  (global-set-key (kbd "C-x c") 'helm-mark-ring)
 #+end_src
 * Common
 #+begin_src emacs-lisp
@@ -226,7 +228,8 @@
 #+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
-    :bind (("M-o" . 'ace-window))
+    :bind (("M-o" . 'ace-window)
+           ("C-M-o" . 'ace-window))
     :config
     (setq aw-scope 'frame)
     (setq aw-background nil)
@@ -273,7 +276,7 @@
     (setq company-show-numbers t)
     (global-company-mode))
 #+end_src
-* C++
+* C/C++
 ** Basic C/C++
 #+begin_src emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.ic\\'" . c++-mode))
@@ -320,7 +323,10 @@
 ** CMake mode
 #+begin_src emacs-lisp
   (use-package cmake-mode
-    :ensure t)
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
+    (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode)))
 #+end_src
 ** Irony
 #+begin_src emacs-lisp
