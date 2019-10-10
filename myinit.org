@@ -50,6 +50,13 @@
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
 
   (global-set-key (kbd "C-x c") 'helm-mark-ring)
+
+  ;; Disable automatically deleting trailing whitespace
+  (defun disable-deleting-trailing-whitespace ()
+    (interactive)
+    (remove-hook 'before-save-hook 'delete-trailing-whitespace))
+
+  (global-set-key (kbd "C-c w") 'disable-deleting-trailing-whitespace)
 #+end_src
 * Common
 #+begin_src emacs-lisp
