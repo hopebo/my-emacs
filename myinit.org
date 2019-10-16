@@ -738,3 +738,9 @@ Git operations in emacs
   (setq sml/theme 'respectful)
   (sml/setup)
 #+end_src
+* Others
+** Compilation
+#+begin_src emacs-lisp
+  (setq compilation-scroll-output 't)
+  (setq compile-command "cd /project_path && ./build.sh -t debug")
+#+end_src
