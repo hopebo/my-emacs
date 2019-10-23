@@ -8,4 +8,6 @@
 (if (file-readable-p custom-file) (load custom-file))
 
 (provide 'init)
+
+(put 'narrow-to-region 'disabled nil)
 ;;; init.el ends here
