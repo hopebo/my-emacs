@@ -222,7 +222,7 @@
            ([remap undo] . undo-tree-redo)
            ("C-x u" . undo-tree-visualize))
     :config
-    (global-undo-tree-mode))
+    (undo-tree-mode 1))
 #+end_src
 * Which Key
 #+begin_src emacs-lisp
@@ -689,11 +689,38 @@ Git operations in emacs
       (org-indent-mode)
       (setq org-log-done 'time)))
 
-  (setq org-todo-keywords
-      '((sequence "TODO" "PROGRESS" "|" "DONE" "ABANDONED")))
+  ;; Get things done
+  (setq org-agenda-files '("~/gtd/inbox.org"
+                           "~/gtd/gtd.org"
+                           "~/gtd/tickler.org"))
+
+  (setq org-capture-templates '(("t" "Todo [inbox]" entry (file+headline "~/gtd/inbox.org" "Task") "* TODO %i%?")
+                                ("i" "Idea [inbox]" entry (file+headline "~/gtd/inbox.org" "Idea") "* TODO %i%?")
+                                ("n" "Note [inbox]" entry (file+headline "~/gtd/inbox.org" "Note") "* TODO %i%?")
+                                ("T" "Tickler" entry (file+headline "~/gtd/tickler.org" "Tickler") "* %i%? \n %U")))
+
+  (setq org-refile-targets '(("~/gtd/gtd.org" :maxlevel . 3)
+                             ("~/gtd/someday.org" :level . 1)
+                             ("~/gtd/tickler.org" :maxlevel . 2)
+                             ("~/gtd/archive.org" :level . 1)))
+
+  (setq org-tag-alist '(("@work" . ?w) ("@learn" . ?l) ("@home" . ?h)))
+
+  (setq org-todo-keywords '((sequence "TODO(t)" "PROGRESS(p)" "WAITING(w)"
+                            "|" "DONE(d)" "CANCELLED(c)")))
+
+  (custom-set-variables '(org-default-notes-file "~/gtd/notes.org")
+                        '(org-agenda-ndays 7)
+                        '(org-deadline-warning-days 14)
+                        '(org-agenda-show-all-dates t)
+                        '(org-agenda-skip-deadline-if-done t)
+                        '(org-agenda-skip-scheduled-if-done t)
+                        '(org-agenda-start-on-weekday nil)
+                        '(org-reverse-note-order t))
 
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c h") 'counsel-org-entity)
+  (global-set-key (kbd "C-c c") 'org-capture)
 #+end_src
 * Gdb
 #+begin_src emacs-lisp
@@ -740,6 +767,10 @@ Git operations in emacs
         ;; Terminal
         (set-terminal-parameter nil 'background-mode 'dark))
       (enable-theme 'solarized)))
+
+  ;; Workaround way to solve that emacsclient cannot load theme
+  ;; configuration in init.el.
+  (custom-set-variables '(frame-background-mode (quote dark)))
 #+end_src
 ** Smart Mode Line
 #+begin_src emacs-lisp
