@@ -479,7 +479,8 @@ Git operations in emacs
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
-    :bind (("C-x g" . magit-status))
+    :bind (("C-x g" . magit-status)
+           ("C-o" . magit-diff-visit-file-other-window))
     :config
     (setq magit-completing-read-function 'ivy-completing-read))
 #+end_src
@@ -703,8 +704,6 @@ Git operations in emacs
                              ("~/gtd/someday.org" :level . 1)
                              ("~/gtd/tickler.org" :maxlevel . 2)
                              ("~/gtd/archive.org" :level . 1)))
-
-  (setq org-tag-alist '(("@work" . ?w) ("@learn" . ?l) ("@home" . ?h)))
 
   (setq org-todo-keywords '((sequence "TODO(t)" "PROGRESS(p)" "WAITING(w)"
                             "|" "DONE(d)" "CANCELLED(c)")))
