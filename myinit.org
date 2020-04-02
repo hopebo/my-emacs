@@ -226,7 +226,7 @@
            ([remap undo] . undo-tree-redo)
            ("C-x u" . undo-tree-visualize))
     :config
-    (undo-tree-mode 1))
+    (global-undo-tree-mode t))
 #+end_src
 * Which Key
 #+begin_src emacs-lisp
@@ -423,7 +423,7 @@ Mark and edit multiple copies simultaniously.
   (use-package iedit
     :ensure t
     :config
-    (global-set-key (kbd "C-i") 'iedit-mode))
+    (global-set-key (kbd "C-x m") 'iedit-mode))
 
   (global-set-key (kbd "C-x n") 'narrow-to-region)
   (global-set-key (kbd "C-x w") 'widen)
@@ -737,6 +737,37 @@ Git operations in emacs
   ;; Disable company-mode for it takes lots of time reading symbols from executable file and generating candidates.
   (add-hook 'gud-mode-hook (lambda () (company-mode -1)))
 #+end_src
+* SQL
+#+begin_src emacs-lisp
+  ;; Predefine database configurations
+  (setq sql-connection-alist
+    '((local-test
+      (sql-product 'mysql)
+      (sql-server "127.0.0.1")
+      (sql-user "root")
+      (sql-password "")
+      (sql-database "test")
+      (sql-port 33332))))
+
+  (defun sql-connect-preset (name)
+  "Connect to a predefined SQL connection listed in `sql-connection-alist'"
+    (eval `(let ,(cdr (assoc name sql-connection-alist))
+      (flet ((sql-get-login (&rest what)))
+        (sql-product-interactive sql-product)))))
+
+  (defun mysql-local ()
+    (interactive)
+    (sql-connect-preset 'local-test))
+
+  ;; Link the current buffer to client buffer
+  (defun mysqli-link()
+    (interactive)
+    (sql-mode)
+    (sql-set-product "mysql")
+    (sql-set-sqli-buffer))
+
+  (global-set-key (kbd "<f9>") 'mysql-local)
+#+end_src
 * Other Language Modes
 #+begin_src emacs-lisp
   ;; Json
@@ -773,7 +804,7 @@ Git operations in emacs
 
   ;; Workaround way to solve that emacsclient cannot load theme
   ;; configuration in init.el.
-  (custom-set-variables '(frame-background-mode (quote dark)))
+  ;; (custom-set-variables '(frame-background-mode (quote dark)))
 #+end_src
 ** Smart Mode Line
 #+begin_src emacs-lisp
