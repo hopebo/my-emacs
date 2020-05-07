@@ -65,7 +65,7 @@
 * Common
 #+begin_src emacs-lisp
   ;; Coding mode configurations
-  (defun coding-mode()
+  (defun coding-mode ()
     ;; Highlight trailing whitespaces and exceeding part
     ;; when lines are longer than whitespace-line-column
     (setq show-trailing-whitespace t)
@@ -314,22 +314,79 @@
 #+end_src
 ** Code navigation
 #+begin_src emacs-lisp
-  (use-package xcscope
-    :ensure t
-    :config
-    (setq cscope-program "cscope")
-    (add-to-list 'cscope-indexer-suffixes "*.ic")
-    (add-to-list 'cscope-indexer-suffixes "*.yy")
-    (add-to-list 'cscope-indexer-suffixes "*.x")
-    (cscope-setup))
+  (defun init-xcscope ()
+    "Load xcscope."
+    (use-package xcscope
+      :ensure t
+      :config
+      (setq cscope-program "cscope")
+      (add-to-list 'cscope-indexer-suffixes "*.ic")
+      (add-to-list 'cscope-indexer-suffixes "*.yy")
+      (add-to-list 'cscope-indexer-suffixes "*.x")
+      (cscope-setup)))
 
-  (use-package ggtags
-    :ensure t
-    :config
-    (add-hook 'c-mode-common-hook
-      (lambda ()
-        (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-          (ggtags-mode 1)))))
+  (defun init-rtags ()
+    "Load rtags."
+    (use-package rtags
+      :ensure t
+      :config
+      (setq rtags-process-flags (concat "--rp-nice-value 10 "
+                                        "--job-count 8 "
+                                        "--error-limit 50000 "
+                                        "--log-file-log-level debug "
+                                        "--completion-logs"))
+      (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
+      (setq rtags-completions-enabled t)
+      (global-set-key (kbd "M-.")
+        (defhydra hydra-rtags (:color pink
+                               :hint nil)
+          "
+           ^Navigation^           ^Move^           ^Actions^          ^Others
+          ----------------------------------------------------------------------
+          _s_: Symbol at Point   _p_: Previous     _N_: Rename       _x_: Buffer
+          _S_: Symbol            _n_: Next         ^ ^               _i_: Include File for Symbol
+          _r_: Refer at Point    _f_: Forward      ^ ^               _I_: Include File
+          _R_: Refer             _b_: Backward     ^ ^               _RET_: Exit
+          "
+          ("s" rtags-find-symbol-at-point)
+          ("S" rtags-find-symbol)
+          ("R" rtags-find-references)
+          ("r" rtags-find-references-at-point)
+          ("n" rtags-next-match)
+          ("p" rtags-previous-match)
+          ("f" rtags-location-stack-forward)
+          ("b" rtags-location-stack-back)
+          ("t" rtags-symbol-type)
+          ("N" rtags-rename-symbol)
+          ("x" rtags-show-rtags-buffer)
+          ("I" rtags-include-file)
+          ("i" rtags-get-include-file-for-symbol)
+          ("RET" nil)))))
+
+  (defun init-ggtags ()
+    "Load ggtags and enable it."
+    (use-package ggtags
+      :ensure t
+      :config
+      (add-hook 'c-mode-common-hook
+        (lambda ()
+          (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+            (ggtags-mode 1))))))
+
+  (defvar navigation-mode "rtags"
+    "The navigation mode used. It is either 'rtags', 'ggtags' or 'xcscope.")
+
+  (defun wrong-navigation-mode()
+    (print "Wrong value of navigation-mode."
+           "The value must be 'rtags', 'ggtags' or 'xcscope'."))
+
+  (cond ((equal navigation-mode "rtags")
+        (init-rtags))
+        ((equal navigation-mode "ggtags")
+        (init-ggtags))
+        ((equal navigation-mode "xcscope")
+        (init-xcscope))
+        (t (wrong-navigation-mode)))
 #+end_src
 ** CMake mode
 #+begin_src emacs-lisp
