@@ -255,7 +255,7 @@
     (setq ivy-use-virtual-buffers t)
     (setq ivy-count-format "(%d/%d) ")
     (setq ivy-initial-inputs-alist nil)
-    (ivy-mode t))
+    (ivy-mode -1))
 
   (use-package swiper
     :ensure t
@@ -337,7 +337,7 @@
                                         "--completion-logs"))
       (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
       (setq rtags-completions-enabled t)
-      (global-set-key (kbd "M-.")
+      (global-set-key (kbd "C-c M-.")
         (defhydra hydra-rtags (:color pink
                                :hint nil)
           "
@@ -361,7 +361,9 @@
           ("x" rtags-show-rtags-buffer)
           ("I" rtags-include-file)
           ("i" rtags-get-include-file-for-symbol)
-          ("RET" nil)))))
+          ("RET" nil))))
+      (require 'rtags-xref)
+      (add-hook 'c-mode-common-hook #'rtags-xref-enable))
 
   (defun init-ggtags ()
     "Load ggtags and enable it."
