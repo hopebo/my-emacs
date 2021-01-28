@@ -226,7 +226,7 @@
            ([remap undo] . undo-tree-redo)
            ("C-x u" . undo-tree-visualize))
     :config
-    (global-undo-tree-mode t))
+    (undo-tree-mode t))
 #+end_src
 * Which Key
 #+begin_src emacs-lisp
@@ -339,8 +339,7 @@
                                         "--job-count 8 "
                                         "--error-limit 50000 "
                                         "--log-file-log-level debug "
-                                        "--completion-logs "
-                                        "--data-dir=~/.cache"))
+                                        "--completion-logs "))
       (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
       (setq rtags-completions-enabled t)
       (global-set-key (kbd "C-c M-.")
