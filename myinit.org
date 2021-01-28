@@ -247,6 +247,11 @@
     (setq aw-dispatch-always t)
     (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+end_src
+* Command Log
+#+begin_src emacs-lisp
+  (use-package command-log-mode
+    :ensure t)
+#+end_src
 * Ivy, Swiper, Counsel
 #+begin_src emacs-lisp
   (use-package ivy
@@ -334,7 +339,8 @@
                                         "--job-count 8 "
                                         "--error-limit 50000 "
                                         "--log-file-log-level debug "
-                                        "--completion-logs"))
+                                        "--completion-logs "
+                                        "--data-dir=~/.cache"))
       (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
       (setq rtags-completions-enabled t)
       (global-set-key (kbd "C-c M-.")
@@ -783,6 +789,14 @@ Git operations in emacs
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c h") 'counsel-org-entity)
   (global-set-key (kbd "C-c c") 'org-capture)
+#+end_src
+* PlantUML Mode
+#+begin_src emacs-lisp
+  (use-package plantuml-mode
+    :ensure t
+    :config
+    (setq plantuml-jar-path "~/Downloads/plantuml.jar")
+    (setq plantuml-default-exec-mode 'jar))
 #+end_src
 * Gdb
 #+begin_src emacs-lisp
