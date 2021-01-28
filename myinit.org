@@ -894,5 +894,15 @@ Git operations in emacs
 #+begin_src emacs-lisp
   (setq compilation-scroll-output 't)
   (setq compile-command "make -j32 mysqld")
-  (global-set-key (kbd "<f10>") 'compile)
+
+  (defun temp-compile()
+    (interactive)
+    (if (vc-root-dir) (setq root-dir (vc-root-dir))
+      (setq root-dir default-directory))
+    (setq test-file (concat root-dir "bld_Debug"))
+    (if (file-exists-p test-file)
+      (cd test-file))
+    (compile compile-command))
+
+  (global-set-key (kbd "<f10>") 'temp-compile)
 #+end_src
