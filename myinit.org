@@ -223,10 +223,10 @@
   (use-package undo-tree
     :ensure t
     :bind (("C-z" . undo-tree-undo)
-           ([remap undo] . undo-tree-redo)
            ("C-x u" . undo-tree-visualize))
     :config
-    (undo-tree-mode t))
+    (global-undo-tree-mode 1))
+
 #+end_src
 * Which Key
 #+begin_src emacs-lisp
@@ -339,7 +339,8 @@
                                         "--job-count 8 "
                                         "--error-limit 50000 "
                                         "--log-file-log-level debug "
-                                        "--completion-logs "))
+                                        "--completion-logs "
+                                        "--data-path=~/.cache"))
       (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
       (setq rtags-completions-enabled t)
       (global-set-key (kbd "C-c M-.")
@@ -412,8 +413,7 @@
     (use-package irony-cdb)
     (add-hook 'c++-mode-hook 'irony-mode)
     (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'objc-mode-hook 'irony-mode)
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+    (add-hook 'objc-mode-hook 'irony-mode))
 
   ;; Company-irony
   (use-package company-irony
