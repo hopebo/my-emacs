@@ -333,7 +333,8 @@
 #+end_src
 * Swiper
 #+begin_src emacs-lisp
-(use-package swiper)
+(use-package swiper
+  :bind (("C-s" . swiper)))
 #+end_src
 * Yasnippet
 #+begin_comment
