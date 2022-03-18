@@ -440,16 +440,19 @@ Git operations in emacs
 ** Compilation
 #+begin_src emacs-lisp
 (setq compilation-scroll-output 't)
-(setq compile-command "make -j32 mysqld")
 
-(defun temp-compile()
+(defun my-compile-func()
   (interactive)
   (if (vc-root-dir) (setq root-dir (vc-root-dir))
     (setq root-dir default-directory))
-  (setq test-file (concat root-dir "bld_Debug"))
-  (if (file-exists-p test-file)
-    (cd test-file))
+  (setq build-direc (concat root-dir "bld_Debug"))
+  (if (file-exists-p build-direc)
+    (cd build-direc))
+  ;; If Makefile exists in current directory, use make command
+  (if (file-exists-p "Makefile")
+    (setq compile-command "make -j32 mysqld")
+    (setq compile-command (concat "g++ -std=c++11 " buffer-file-name)))
   (compile compile-command))
 
-(global-set-key (kbd "<f10>") 'temp-compile)
+(global-set-key (kbd "<f10>") 'my-compile-func)
 #+end_src
