@@ -67,6 +67,9 @@
     ;; Highlight trailing whitespaces and exceeding part
     ;; when lines are longer than whitespace-line-column
     (setq show-trailing-whitespace t)
+    ;; If we want to tolerate projects with particularly long lines of code,
+    ;; set the following variable to a bigger number.
+    ;; (setq whitespace-line-column 200)
     ;; Auto-fill when current line is longer than 80 characters
     (setq fill-column 80)
     (setq auto-fill-function 'do-auto-fill)
@@ -100,15 +103,17 @@
   ;; Highlight cursor line
   (global-hl-line-mode t)
 
+  ;; Remove tab-mark if TAB is generally used in a project.
   (setq whitespace-style '(face tabs trailing lines space-before-tab
     indentation empty space-after-tab tab-mark))
 #+end_src
 * Package Archives
 #+begin_src emacs-lisp
   (require 'package)
-  (setq package-archives '(("gnu" . "http://elpa.emacs-china.org/gnu/")
-                           ("melpa" . "http://elpa.emacs-china.org/melpa/")
-                           ("org" . "http://elpa.emacs-china.org/org/")))
+  ;; (setq package-archives '(("gnu" . "http://elpa.emacs-china.org/gnu/")
+  ;;                          ("melpa" . "http://elpa.emacs-china.org/melpa/")
+  ;;                          ("org" . "http://elpa.emacs-china.org/org/")))
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
   ;; Disable automatically loading after processing the init file
   (setq package-enable-at-startup nil)
@@ -236,6 +241,7 @@
 * Undo tree
 #+begin_src emacs-lisp
 (use-package undo-tree)
+;; C-/ undo; M-_ redo; C-x u visulaize.
 (global-undo-tree-mode t)
 #+end_src
 * C/C++
@@ -311,7 +317,12 @@
                                     "--error-limit 50000 "
                                     "--log-file-log-level debug "
                                     "--completion-logs"))
-  (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
+  ;; The hook will be called everytime we find definitions or references, causing multiple
+  ;; emacs kill each other's rdm and launch its own, which is slow at startup.
+  ;; (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
+  ;;
+  ;; Using the following command to keep a daemon rdm backend on the server. Multiple emacs clients can share it.
+  ;; rdm --rp-nice-value 10 --job-count 8 --error-limit 50000 --log-file-log-level debug --completion-logs --daemon
   (setq rtags-completions-enabled t)
   (require 'rtags-xref)
   (add-hook 'c-mode-common-hook #'rtags-xref-enable)
