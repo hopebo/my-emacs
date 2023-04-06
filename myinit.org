@@ -380,6 +380,15 @@ Git operations in emacs
   (smartparens-global-mode t)
   (show-smartparens-global-mode t))
 #+end_src
+* Avy
+#+begin_comment
+Quickly jump to the position on screen beginning with specific character.
+#+end_comment
+#+begin_src emacs-lisp
+(use-package avy
+  :ensure t
+  :bind (("M-g w" . avy-goto-word-1)))
+#+end_src
 * Gdb
 #+begin_src emacs-lisp
 ;; Enable mouse support
