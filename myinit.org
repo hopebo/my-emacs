@@ -278,36 +278,50 @@
 (setq company-idle-delay 0)
 (setq company-minimum-prefix-length 3)
 (setq company-show-numbers t)
+;; Popup the completion window manually
 (global-set-key (kbd "C-c c") 'company-capf)
 #+end_src
 ** Code navigation
 #+begin_src emacs-lisp
 ;; lsp-mode settings
+;; NOTE: clangd cannot correctly find the references if the project directory is
+;; under a symlinked parent directory. See https://github.com/clangd/clangd/issues/503
 (defun init-lsp ()
   "Load lsp-mode."
   (use-package lsp-mode
-    :init (setq lsp-keymap-prefix "C-c l"))
-    (add-hook 'c-mode-common-hook #'lsp-deferred)
+    :init (setq lsp-keymap-prefix "C-c l")
+    :custom (lsp-idle-delay 0.5)
+            (lsp-completion-provider :capf)
+            (lsp-enable-folding t)
+            (lsp-enable-snippet t)
+            (lsp-headerline-breadcrumb-enable nil)
+            (lsp-symbol-highlighting-skip-current nil)
+            (lsp-server-trace "verbose")
+            (lsp-clients-clangd-args
+              '("-j=4" "-background-index" "-log=verbose"
+                "-all-scopes-completion" "-suggest-missing-includes")))
+  (add-hook 'c-mode-common-hook #'lsp-deferred)
 
-    (cl-defmethod my-xref-backend-identifier-at-point ((_backend (eql xref-lsp)))
-      (let ((thing (thing-at-point 'symbol)))
-        (and thing (propertize thing
-			   'identifier-at-point t))))
+  ;; Input symbol name to find the definition
+  (cl-defmethod my-xref-backend-identifier-at-point ((_backend (eql xref-lsp)))
+    (let ((thing (thing-at-point 'symbol)))
+      (and thing (propertize thing
+        'identifier-at-point t))))
 
-    (advice-add 'xref-backend-identifier-at-point :override #'my-xref-backend-identifier-at-point)
+  (advice-add 'xref-backend-identifier-at-point :override #'my-xref-backend-identifier-at-point)
 
-    (cl-defmethod my-xref-backend-definitions ((_backend (eql xref-lsp)) identifier)
-      (save-excursion
-        (if (not (get-text-property 0 'identifier-at-point identifier))
-          (-if-let (pos (assoc identifier lsp--symbols-cache))
-            (progn (goto-char (cl-rest pos))
-              (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
-                (lsp--text-document-position-params))))
-           (xref-backend-apropos _backend identifier))
-        (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
-          (lsp--text-document-position-params))))))
+  (cl-defmethod my-xref-backend-definitions ((_backend (eql xref-lsp)) identifier)
+    (save-excursion
+      (if (not (get-text-property 0 'identifier-at-point identifier))
+        (-if-let (pos (assoc identifier lsp--symbols-cache))
+          (progn (goto-char (cl-rest pos))
+            (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
+              (lsp--text-document-position-params))))
+         (xref-backend-apropos _backend identifier))
+      (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
+        (lsp--text-document-position-params))))))
 
-    (advice-add 'xref-backend-definitions :override #'my-xref-backend-definitions))
+  (advice-add 'xref-backend-definitions :override #'my-xref-backend-definitions))
 
 ;; rtags settings
 (defun init-rtags ()
@@ -318,7 +332,7 @@
                                     "--log-file-log-level debug "
                                     "--completion-logs"))
   ;; The hook will be called everytime we find definitions or references, causing multiple
-  ;; emacs kill each other's rdm and launch its own, which is slow at startup.
+  ;; emacs kill each other's rdm and launch its own, which is slow at startup. Not advised.
   ;; (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
   ;;
   ;; Using the following command to keep a daemon rdm backend on the server. Multiple emacs clients can share it.
@@ -334,7 +348,7 @@
   (add-hook 'c-mode-common-hook 'company-mode)
   (define-key c-mode-base-map (kbd "<C-tab>") (function company-complete)))
 
-(defvar navigation-mode "rtags"
+(defvar navigation-mode "lsp"
   "The navigation mode used. It is either 'rtags' or 'lsp'.")
 
 (cond ((equal navigation-mode "rtags")
@@ -372,6 +386,45 @@ Git operations in emacs
 (use-package magit
   :bind (("C-x g" . magit-status)
          ("C-o" . magit-diff-visit-file-other-window)))
+#+end_src
+* Ivy
+#+begin_comment
+Completion mechanism for commands, symbols, files, etc in minibuffer.
+Very convenient, but in some cases like find-definition could have performance issue due to
+the huge number of symbol candidates in a project.
+#+end_comment
+#+begin_src emacs-lisp
+(use-package ivy
+  :custom
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "%d/%d ")
+    (ivy-display-style 'fancy)
+  :config
+    (ivy-mode t))
+#+end_src
+* Counsel
+#+begin_comment
+A little enhancement for some built-in Emacs functions.
+#+end_comment
+#+begin_src emacs-lisp
+(use-package counsel
+  :custom
+    (counsel-find-file-ignore-regexp "^#\\|/#\\|/\\.#\\|\\.(orig|rej)$\\|clangd.*\\(.idx\\)$")
+  :config
+    (counsel-mode t)
+    (require 'map)
+    ;; ivy has a sort function list to provide sort method's to functions.
+    (map-put ivy-sort-functions-alist #'counsel-M-x #'string-lessp))
+#+end_src
+* Projectile
+#+begin_comment
+Project files' management. Do everything in a project view.
+#+end_comment
+#+begin_src emacs-lisp
+(use-package projectile
+  :config
+    (projectile-mode +1)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+end_src
 * Smartparens
 #+begin_src emacs-lisp
