@@ -355,6 +355,9 @@
       (init-rtags))
       ((equal navigation-mode "lsp")
       (init-lsp)))
+
+;; Don't prompt if there's value at point for following functions
+(setq xref-prompt-for-identifier '(not xref-find-definitions xref-find-references))
 #+end_src
 * Swiper
 #+begin_src emacs-lisp
