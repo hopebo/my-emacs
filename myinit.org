@@ -450,6 +450,8 @@ Quickly jump to the position on screen beginning with specific character.
 ;; Enable mouse support
 (add-hook 'gud-mode-hook (lambda ()
    (setq gdb-show-main t)))
+;; Conflict with tmux prefix C-t
+(global-set-key (kbd "C-x C-a C-q") 'gud-tbreak)
 #+end_src
 * Smart Mode Line
 #+begin_src emacs-lisp
