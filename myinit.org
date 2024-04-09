@@ -298,9 +298,14 @@
             (lsp-symbol-highlighting-skip-current nil)
             (lsp-server-trace "verbose")
             (lsp-clients-clangd-args
-              '("-j=4" "-background-index" "-log=verbose"
+              '("-j=32" "-background-index" "-log=verbose"
                 "-all-scopes-completion" "-suggest-missing-includes")))
   (add-hook 'c-mode-common-hook #'lsp-deferred)
+
+  ;; Don't collect completion symbols. If there are too many symbols in current file, will hang for seconds
+  (cl-defmethod my-xref-backend-identifier-completion-table ((_backend (eql xref-lsp)))
+    )
+  (advice-add 'xref-backend-identifier-completion-table :override #'my-xref-backend-identifier-completion-table)
 
   ;; Input symbol name to find the definition
   (cl-defmethod my-xref-backend-identifier-at-point ((_backend (eql xref-lsp)))
@@ -462,6 +467,26 @@ Quickly jump to the position on screen beginning with specific character.
 (setq sml/theme 'respectful)
 (sml/setup)
 #+end_src
+* Search
+#+begin_src emacs-lisp
+;; Ag(silver searcher)
+;; Projectile integrated key is `C-c p s s`
+(use-package ag
+  :ensure t
+  :custom
+  (ag-highlight-search t)
+  (ag-reuse-buffers t)) ;; Use the same buffer to display results
+
+(use-package wgrep
+;; Edit in search buffer and apply to files
+  :ensure t) ;; wgrep-change-to-wgrep-mode
+#+end_src
+* Git timemachine
+#+begin_src emacs-lisp
+;; View a file between different versions `M-x git-timemachine`
+(use-package git-timemachine
+  :ensure t)
+#+end_src
 * SQL
 #+begin_src emacs-lisp
 ;; Predefine database configurations
@@ -529,7 +554,7 @@ Quickly jump to the position on screen beginning with specific character.
   ;; If Makefile exists in current directory, use make command
   (if (file-exists-p "Makefile")
     (setq compile-command "make -j32 mysqld")
-    (setq compile-command (concat "g++ -std=c++11 " buffer-file-name)))
+    (setq compile-command (concat "g++ -std=c++11 -g " buffer-file-name)))
   (compile compile-command))
 
 (global-set-key (kbd "<f10>") 'my-compile-func)
