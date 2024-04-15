@@ -129,112 +129,113 @@
 #+end_src
 * Use-package bootstrap
 #+begin_src emacs-lisp
-;; Install use-package
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+  ;; Install use-package
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
 
-;; Enable use-package
-(eval-when-compile
-  (require 'use-package))
+  ;; Enable use-package
+  (eval-when-compile
+    (require 'use-package))
 
-;; Always download absent packages
-(setq use-package-always-ensure t)
+  ;; Always download absent packages
+  (setq use-package-always-ensure t)
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
-(require 'ibuffer)
+  (require 'ibuffer)
 
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 
-;; Define buffer groups
-(setq ibuffer-saved-filter-groups
-  (quote (("default"
-          ("dired" (mode . dired-mode))
-          ("emacs" (or
-                   (name . "^\\*scratch\\*$")
-                   (name . "^\\*Help\\*$")
-                   (name . "^\\*Messages\\*$")))
-          ("programming" (or
-                         (mode . python-mode)
-                         (mode . c++-mode)
-                         (mode . c-mode)
-                         (mode . perl-mode)
-                         (mode . python-mode)
-                         (mode . emacs-lisp-mode)))
-          ("shell" (or
-                   (mode . sh-mode)
-                   (mode . term-mode)
-                   (mode . shell-mode)
-                   (mode . eshell-mode)))
-          ("edit" (or
-                  (mode . org-mode)
-                  (mode . markdown-mode)
-                  (mode . text-mode)))
-          ("git" (or
-                 (mode . diff-mode)
-                 (name . "^magit.*")
-                 (name . ".gitignore")))
-          ("gdb" (or
-                 (mode . gdb-frames-mode)
-                 (mode . gdb-inferior-io-mode)
-                 (mode . gdb-breakpoints-mode)
-                 (mode . gud-mode)
-                 (mode . gdb-threads-mode)
-                 (mode . gdb-locals-mode)))
-          ("gnus" (or
-                  (mode . message-mode)
-                  (mode . bbdb-mode)
-                  (mode . mail-mode)
-                  (mode . gnus-group-mode)
-                  (mode . gnus-summary-mode)
-                  (mode . gnus-article-mode)
-                  (name . "^\\.bbdb$")
-                  (name . "^\\.newsrc-dribble")))))))
+  ;; Define buffer groups
+  (setq ibuffer-saved-filter-groups
 
-(add-hook 'ibuffer-mode-hook
-  (lambda ()
-    (ibuffer-switch-to-saved-filter-groups "default")))
+        (quote (("default"
+                 ("dired" (mode . dired-mode))
+                 ("emacs" (or
+                           (name . "^\\*scratch\\*$")
+                           (name . "^\\*Help\\*$")
+                           (name . "^\\*Messages\\*$")))
+                 ("programming" (or
+                                 (mode . python-mode)
+                                 (mode . c++-mode)
+                                 (mode . c-mode)
+                                 (mode . perl-mode)
+                                 (mode . python-mode)
+                                 (mode . emacs-lisp-mode)))
+                 ("shell" (or
+                           (mode . sh-mode)
+                           (mode . term-mode)
+                           (mode . shell-mode)
+                           (mode . eshell-mode)))
+                 ("edit" (or
+                          (mode . org-mode)
+                          (mode . markdown-mode)
+                          (mode . text-mode)))
+                 ("git" (or
+                         (mode . diff-mode)
+                         (name . "^magit.*")
+                         (name . ".gitignore")))
+                 ("gdb" (or
+                         (mode . gdb-frames-mode)
+                         (mode . gdb-inferior-io-mode)
+                         (mode . gdb-breakpoints-mode)
+                         (mode . gud-mode)
+                         (mode . gdb-threads-mode)
+                         (mode . gdb-locals-mode)))
+                 ("gnus" (or
+                          (mode . message-mode)
+                          (mode . bbdb-mode)
+                          (mode . mail-mode)
+                          (mode . gnus-group-mode)
+                          (mode . gnus-summary-mode)
+                          (mode . gnus-article-mode)
+                          (name . "^\\.bbdb$")
+                          (name . "^\\.newsrc-dribble")))))))
 
-;; Stop showing groups in which there is no buffer
-(setq ibuffer-show-empty-filter-groups nil)
+  (add-hook 'ibuffer-mode-hook
+            (lambda ()
+              (ibuffer-switch-to-saved-filter-groups "default")))
 
-;; Hide the last two summary lines
-(setq ibuffer-display-summary nil)
+  ;; Stop showing groups in which there is no buffer
+  (setq ibuffer-show-empty-filter-groups nil)
 
-;; Do not ask for confirmation when deleting marked buffers
-(setq ibuffer-expert t)
+  ;; Hide the last two summary lines
+  (setq ibuffer-display-summary nil)
 
-;; Use human readable Size column instead of original one
-(define-ibuffer-column size-h
-  (:name "Size" :inline t)
-  (cond
-    ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-    ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
-    ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
-    (t (format "%8d" (buffer-size)))))
+  ;; Do not ask for confirmation when deleting marked buffers
+  (setq ibuffer-expert t)
 
-;; Modify the default ibuffer-formats
-(setq ibuffer-formats
-  '((mark modified read-only " "
-    (name 18 18 :left :nil)
-    " "
-    (size-h 9 -1 :right)
-    " "
-    (mode 16 16 :left :elide)
-    " "
-    filename-and-process)))
+  ;; Use human readable Size column instead of original one
+  (define-ibuffer-column size-h
+    (:name "Size" :inline t)
+    (cond
+     ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+     ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+     ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+     (t (format "%8d" (buffer-size)))))
+
+  ;; Modify the default ibuffer-formats
+  (setq ibuffer-formats
+        '((mark modified read-only " "
+                (name 18 18 :left :nil)
+                " "
+                (size-h 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " "
+                filename-and-process)))
 #+end_src
 * Which Key
 #+begin_src emacs-lisp
-(use-package which-key)
-(which-key-mode)
+  (use-package which-key)
+  (which-key-mode)
 #+end_src
 * Ace Window
 #+begin_src emacs-lisp
-(use-package ace-window
-  :bind ("M-o" . 'ace-window)
-  :config
+  (use-package ace-window
+    :bind ("M-o" . 'ace-window)
+    :config
     (setq aw-scope 'frame)
     (setq aw-background nil)
     (setq aw-dispatch-always t)
@@ -242,138 +243,140 @@
 #+end_src
 * Command Log
 #+begin_src emacs-lisp
-(use-package command-log-mode)
+  (use-package command-log-mode)
 #+end_src
 * Undo tree
 #+begin_src emacs-lisp
-(use-package undo-tree)
-;; C-/ undo; M-_ redo; C-x u visulaize.
-(global-undo-tree-mode t)
+  (use-package undo-tree)
+  ;; C-/ undo; M-_ redo; C-x u visulaize.
+  (global-undo-tree-mode t)
 #+end_src
 * C/C++
 ** Basic C/C++
 #+begin_src emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.ic\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.yy\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.ic\\'" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.yy\\'" . c++-mode))
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-;; Syntax highlight for latest C++
-(use-package modern-cpp-font-lock)
-(add-hook 'c-mode-common-hook 'modern-c++-font-lock-global-mode)
+  ;; Syntax highlight for latest C++
+  (use-package modern-cpp-font-lock)
+  (add-hook 'c-mode-common-hook 'modern-c++-font-lock-global-mode)
 
-;; Google c/c++ style
-(use-package google-c-style)
+  ;; Google c/c++ style
+  (use-package google-c-style)
 
-(add-hook 'c-mode-common-hook 'google-set-c-style)
-(add-hook 'c-mode-common-hook 'google-make-newline-indent)
+  (add-hook 'c-mode-common-hook 'google-set-c-style)
+  (add-hook 'c-mode-common-hook 'google-make-newline-indent)
+
+  ;; Fold code block with `C-c @ C-c`
+  (add-hook 'c-mode-common-hook 'hs-minor-mode)
 #+end_src
 ** CMake mode
 #+begin_src emacs-lisp
-(use-package cmake-mode)
-(add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
-(add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
+  (use-package cmake-mode)
+  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
+  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
 #+end_src
 ** Code check
 #+begin_src emacs-lisp
-(use-package flycheck)
-(setq flycheck-clang-language-standard "c++11")
+  (use-package flycheck)
+  (setq flycheck-clang-language-standard "c++11")
 #+end_src
 ** Code completion
 #+begin_src emacs-lisp
-(use-package company)
-(setq company-idle-delay 0)
-(setq company-minimum-prefix-length 3)
-(setq company-show-numbers t)
-;; Popup the completion window manually
-(global-set-key (kbd "C-c c") 'company-capf)
+  (use-package company)
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 3)
+  (setq company-show-numbers t)
+  ;; Popup the completion window manually
+  (global-set-key (kbd "C-c c") 'company-capf)
 #+end_src
 ** Code navigation
 #+begin_src emacs-lisp
-;; lsp-mode settings
-;; NOTE: clangd cannot correctly find the references if the project directory is
-;; under a symlinked parent directory. See https://github.com/clangd/clangd/issues/503
-(defun init-lsp ()
-  "Load lsp-mode."
-  (use-package lsp-mode
-    :init (setq lsp-keymap-prefix "C-c l")
-    :custom (lsp-idle-delay 0.5)
-            (lsp-completion-provider :capf)
-            (lsp-enable-folding t)
-            (lsp-enable-snippet t)
-            (lsp-headerline-breadcrumb-enable nil)
-            (lsp-symbol-highlighting-skip-current nil)
-            (lsp-server-trace "verbose")
-            (lsp-clients-clangd-args
-              '("-j=32" "-background-index" "-log=verbose"
-                "-all-scopes-completion" "-suggest-missing-includes")))
-  (add-hook 'c-mode-common-hook #'lsp-deferred)
+  ;; lsp-mode settings
+  ;; NOTE: clangd cannot correctly find the references if the project directory is
+  ;; under a symlinked parent directory. See https://github.com/clangd/clangd/issues/503
+  (defun init-lsp ()
+    "Load lsp-mode."
+    (use-package lsp-mode
+      :init (setq lsp-keymap-prefix "C-c l")
+      :custom (lsp-idle-delay 0.5)
+      (lsp-completion-provider :capf)
+      (lsp-enable-folding t)
+      (lsp-enable-snippet t)
+      (lsp-headerline-breadcrumb-enable nil)
+      (lsp-server-trace "verbose")
+      (lsp-clients-clangd-args
+       '("-j=32" "-background-index" "-log=verbose"
+         "-all-scopes-completion" "-suggest-missing-includes")))
+    (add-hook 'c-mode-common-hook #'lsp-deferred)
 
-  ;; Don't collect completion symbols. If there are too many symbols in current file, will hang for seconds
-  (cl-defmethod my-xref-backend-identifier-completion-table ((_backend (eql xref-lsp)))
-    )
-  (advice-add 'xref-backend-identifier-completion-table :override #'my-xref-backend-identifier-completion-table)
+    ;; Don't collect completion symbols. If there are too many symbols in current file, will hang for seconds
+    (cl-defmethod my-xref-backend-identifier-completion-table ((_backend (eql xref-lsp)))
+      )
+    (advice-add 'xref-backend-identifier-completion-table :override #'my-xref-backend-identifier-completion-table)
 
-  ;; Input symbol name to find the definition
-  (cl-defmethod my-xref-backend-identifier-at-point ((_backend (eql xref-lsp)))
-    (let ((thing (thing-at-point 'symbol)))
-      (and thing (propertize thing
-        'identifier-at-point t))))
+    ;; Input symbol name to find the definition
+    (cl-defmethod my-xref-backend-identifier-at-point ((_backend (eql xref-lsp)))
+      (let ((thing (thing-at-point 'symbol)))
+        (and thing (propertize thing
+                               'identifier-at-point t))))
 
-  (advice-add 'xref-backend-identifier-at-point :override #'my-xref-backend-identifier-at-point)
+    (advice-add 'xref-backend-identifier-at-point :override #'my-xref-backend-identifier-at-point)
 
-  (cl-defmethod my-xref-backend-definitions ((_backend (eql xref-lsp)) identifier)
-    (save-excursion
-      (if (not (get-text-property 0 'identifier-at-point identifier))
-        (-if-let (pos (assoc identifier lsp--symbols-cache))
-          (progn (goto-char (cl-rest pos))
-            (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
-              (lsp--text-document-position-params))))
-         (xref-backend-apropos _backend identifier))
-      (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
-        (lsp--text-document-position-params))))))
+    (cl-defmethod my-xref-backend-definitions ((_backend (eql xref-lsp)) identifier)
+      (save-excursion
+        (if (not (get-text-property 0 'identifier-at-point identifier))
+            (-if-let (pos (assoc identifier lsp--symbols-cache))
+                (progn (goto-char (cl-rest pos))
+                       (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
+                                                                  (lsp--text-document-position-params))))
+              (xref-backend-apropos _backend identifier))
+          (lsp--locations-to-xref-items (lsp-request "textDocument/definition"
+                                                     (lsp--text-document-position-params))))))
 
-  (advice-add 'xref-backend-definitions :override #'my-xref-backend-definitions))
+    (advice-add 'xref-backend-definitions :override #'my-xref-backend-definitions))
 
-;; rtags settings
-(defun init-rtags ()
-  "Load rtags."
-  (setq rtags-process-flags (concat "--rp-nice-value 10 "
-                                    "--job-count 8 "
-                                    "--error-limit 50000 "
-                                    "--log-file-log-level debug "
-                                    "--completion-logs"))
-  ;; The hook will be called everytime we find definitions or references, causing multiple
-  ;; emacs kill each other's rdm and launch its own, which is slow at startup. Not advised.
-  ;; (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
-  ;;
-  ;; Using the following command to keep a daemon rdm backend on the server. Multiple emacs clients can share it.
-  ;; rdm --rp-nice-value 10 --job-count 8 --error-limit 50000 --log-file-log-level debug --completion-logs --daemon
-  (setq rtags-completions-enabled t)
-  (require 'rtags-xref)
-  (add-hook 'c-mode-common-hook #'rtags-xref-enable)
-  (require 'company)
-  (setq rtags-autostart-diagnostics t)
-  (rtags-diagnostics)
-  (setq rtags-completions-enabled t)
-  (push 'company-rtags company-backends)
-  (add-hook 'c-mode-common-hook 'company-mode)
-  (define-key c-mode-base-map (kbd "<C-tab>") (function company-complete)))
+  ;; rtags settings
+  (defun init-rtags ()
+    "Load rtags."
+    (setq rtags-process-flags (concat "--rp-nice-value 10 "
+                                      "--job-count 8 "
+                                      "--error-limit 50000 "
+                                      "--log-file-log-level debug "
+                                      "--completion-logs"))
+    ;; The hook will be called everytime we find definitions or references, causing multiple
+    ;; emacs kill each other's rdm and launch its own, which is slow at startup. Not advised.
+    ;; (add-hook 'c-mode-common-hook 'rtags-start-process-unless-running)
+    ;;
+    ;; Using the following command to keep a daemon rdm backend on the server. Multiple emacs clients can share it.
+    ;; rdm --rp-nice-value 10 --job-count 8 --error-limit 50000 --log-file-log-level debug --completion-logs --daemon
+    (setq rtags-completions-enabled t)
+    (require 'rtags-xref)
+    (add-hook 'c-mode-common-hook #'rtags-xref-enable)
+    (require 'company)
+    (setq rtags-autostart-diagnostics t)
+    (rtags-diagnostics)
+    (setq rtags-completions-enabled t)
+    (push 'company-rtags company-backends)
+    (add-hook 'c-mode-common-hook 'company-mode)
+    (define-key c-mode-base-map (kbd "<C-tab>") (function company-complete)))
 
-(defvar navigation-mode "lsp"
-  "The navigation mode used. It is either 'rtags' or 'lsp'.")
+  (defvar navigation-mode "lsp"
+    "The navigation mode used. It is either 'rtags' or 'lsp'.")
 
-(cond ((equal navigation-mode "rtags")
-      (init-rtags))
-      ((equal navigation-mode "lsp")
-      (init-lsp)))
+  (cond ((equal navigation-mode "rtags")
+         (init-rtags))
+        ((equal navigation-mode "lsp")
+         (init-lsp)))
 
-;; Don't prompt if there's value at point for following functions
-(setq xref-prompt-for-identifier '(not xref-find-definitions xref-find-references))
+  ;; Don't prompt if there's value at point for following functions
+  (setq xref-prompt-for-identifier '(not xref-find-definitions xref-find-references))
 #+end_src
 * Swiper
 #+begin_src emacs-lisp
-(use-package swiper
-  :bind (("C-s" . swiper)))
+  (use-package swiper
+    :bind (("C-s" . swiper)))
 #+end_src
 * Yasnippet
 #+begin_comment
@@ -381,15 +384,15 @@ A template system for Emacs. It allows you to type an abbreviation and
 automatically expand it into function templates.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package yasnippet)
-(use-package yasnippet-snippets)
+  (use-package yasnippet)
+  (use-package yasnippet-snippets)
 #+end_src
 * Iedit
 #+begin_comment
 Mark and edit multiple copies simultaniously.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package iedit)
+  (use-package iedit)
 #+end_src
 * Git
 ** Magit
@@ -397,9 +400,9 @@ Mark and edit multiple copies simultaniously.
 Git operations in emacs
 #+end_comment
 #+begin_src emacs-lisp
-(use-package magit
-  :bind (("C-x g" . magit-status)
-         ("C-o" . magit-diff-visit-file-other-window)))
+  (use-package magit
+    :bind (("C-x g" . magit-status)
+           ("C-o" . magit-diff-visit-file-other-window)))
 #+end_src
 * Ivy
 #+begin_comment
@@ -408,12 +411,12 @@ Very convenient, but in some cases like find-definition could have performance i
 the huge number of symbol candidates in a project.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package ivy
-  :custom
+  (use-package ivy
+    :custom
     (ivy-use-virtual-buffers t)
     (ivy-count-format "%d/%d ")
     (ivy-display-style 'fancy)
-  :config
+    :config
     (ivy-mode t))
 #+end_src
 * Counsel
@@ -421,10 +424,10 @@ the huge number of symbol candidates in a project.
 A little enhancement for some built-in Emacs functions.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package counsel
-  :custom
+  (use-package counsel
+    :custom
     (counsel-find-file-ignore-regexp "^#\\|/#\\|/\\.#\\|\\.(orig|rej)$\\|clangd.*\\(.idx\\)$")
-  :config
+    :config
     (counsel-mode t)
     (require 'map)
     ;; ivy has a sort function list to provide sort method's to functions.
@@ -467,34 +470,35 @@ Powerful enough to replace the functions of Ivy and Counsel.
 Project files' management. Do everything in a project view.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package projectile
-  :config
+  (use-package projectile
+    :config
     (projectile-mode +1)
     (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 #+end_src
 * Smartparens
 #+begin_src emacs-lisp
-(use-package smartparens
-  :config
-  (smartparens-global-mode t)
-  (show-smartparens-global-mode t))
+  (use-package smartparens
+    :config
+    (smartparens-global-mode t)
+    (show-smartparens-global-mode t))
 #+end_src
 * Avy
 #+begin_comment
 Quickly jump to the position on screen beginning with specific character.
 #+end_comment
 #+begin_src emacs-lisp
-(use-package avy
-  :ensure t
-  :bind (("M-g w" . avy-goto-word-1)))
+  (use-package avy
+    :ensure t
+    :bind (("M-g w" . avy-goto-word-1)))
 #+end_src
 * Gdb
 #+begin_src emacs-lisp
-;; Enable mouse support
-(add-hook 'gud-mode-hook (lambda ()
-   (setq gdb-show-main t)))
-;; Conflict with tmux prefix C-t
-(global-set-key (kbd "C-x C-a C-q") 'gud-tbreak)
+  ;; Enable mouse support
+  (add-hook 'gud-mode-hook (lambda ()
+                             (setq gdb-show-main t)))
+
+  ;; Conflict with tmux prefix C-t
+  (global-set-key (kbd "C-x C-a C-q") 'gud-tbreak)
 #+end_src
 * Smart Mode Line
 #+begin_src emacs-lisp
@@ -507,74 +511,76 @@ Quickly jump to the position on screen beginning with specific character.
 #+end_src
 * Git timemachine
 #+begin_src emacs-lisp
-;; View a file between different versions `M-x git-timemachine`
-(use-package git-timemachine
-  :ensure t)
+  ;; View a file between different versions `M-x git-timemachine`
+  (use-package git-timemachine
+    :ensure t)
 #+end_src
 * SQL
 #+begin_src emacs-lisp
-;; Predefine database configurations
-(setq sql-connection-alist
-  '((local-test
-    (sql-product 'mysql)
-    (sql-server "127.0.0.1")
-    (sql-user "root")
-    (sql-password "")
-    (sql-database "test")
-    (sql-port 33332))))
+  ;; Predefine database configurations
+  (setq sql-connection-alist
+        '((local-test
+           (sql-product 'mysql)
+           (sql-server "127.0.0.1")
+           (sql-user "root")
+           (sql-password "")
+           (sql-database "test")
+           (sql-port 33332))))
 
-(defun sql-connect-preset (name)
-"Connect to a predefined SQL connection listed in `sql-connection-alist'"
-  (eval `(let ,(cdr (assoc name sql-connection-alist))
-    (flet ((sql-get-login (&rest what)))
-      (sql-product-interactive sql-product)))))
+  (defun sql-connect-preset (name)
+    "Connect to a predefined SQL connection listed in `sql-connection-alist'"
+    (eval `(let ,(cdr (assoc name sql-connection-alist))
+             (flet ((sql-get-login (&rest what)))
+                   (sql-product-interactive sql-product)))))
 
-(defun mysql-local ()
-  (interactive)
-  (sql-connect-preset 'local-test))
+  (defun mysql-local ()
+    (interactive)
+    (sql-connect-preset 'local-test))
 
-;; Link the current buffer to client buffer
-(defun mysqli-link()
-  (interactive)
-  (sql-mode)
-  (sql-set-product "mysql")
-  (sql-set-sqli-buffer))
+  ;; Link the current buffer to client buffer
+  (defun mysqli-link()
+    (interactive)
+    (sql-mode)
+    (sql-set-product "mysql")
+    (sql-set-sqli-buffer))
 
-(global-set-key (kbd "<f9>") 'mysql-local)
+  (global-set-key (kbd "<f9>") 'mysql-local)
 #+end_src
 * Other Manually Packages
 ** Solarized Theme
 #+begin_src emacs-lisp
-;; Load solarized theme
-(add-to-list 'custom-theme-load-path
-  "~/.emacs.d/site-lisp/emacs-color-theme-solarized")
-(load-theme 'solarized t)
-(add-hook 'after-init-hook
-  (lambda ()
-    (if (display-graphic-p)
-      ;; GUI
-      (set-frame-parameter nil 'background-mode 'light)
-      ;; Terminal
-      (set-terminal-parameter nil 'background-mode 'dark))
-    (enable-theme 'solarized)))
+  ;; Load solarized theme
+  (add-to-list 'custom-theme-load-path
+               "~/.emacs.d/site-lisp/emacs-color-theme-solarized")
+  (load-theme 'solarized t)
+  (add-hook 'after-init-hook
+            (lambda ()
+              (if (display-graphic-p)
+                  ;; GUI
+                  (set-frame-parameter nil 'background-mode 'light)
+                ;; Terminal
+                (set-terminal-parameter nil 'background-mode 'dark))
+              (enable-theme 'solarized)))
 #+end_src
 * Others
 ** Compilation
 #+begin_src emacs-lisp
-(setq compilation-scroll-output 't)
+  (setq compilation-scroll-output 't)
+  ;; Display colors normally in compilation output
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
-(defun my-compile-func()
-  (interactive)
-  (if (vc-root-dir) (setq root-dir (vc-root-dir))
-    (setq root-dir default-directory))
-  (setq build-direc (concat root-dir "bld_Debug"))
-  (if (file-exists-p build-direc)
-    (cd build-direc))
-  ;; If Makefile exists in current directory, use make command
-  (if (file-exists-p "Makefile")
-    (setq compile-command "make -j32 mysqld")
-    (setq compile-command (concat "g++ -std=c++11 -g " buffer-file-name)))
-  (compile compile-command))
+  (defun my-compile-func()
+    (interactive)
+    (if (vc-root-dir) (setq root-dir (vc-root-dir))
+      (setq root-dir default-directory))
+    (setq build-direc (concat root-dir "build-Debug"))
+    (if (file-exists-p build-direc)
+        (cd build-direc))
+    ;; If Makefile exists in current directory, use make command
+    (if (file-exists-p "Makefile")
+        (setq compile-command "mold -run make -j32 mysqld")
+      (setq compile-command (concat "g++ -std=c++11 -g " buffer-file-name)))
+    (compile compile-command))
 
-(global-set-key (kbd "<f10>") 'my-compile-func)
+  (global-set-key (kbd "<f10>") 'my-compile-func)
 #+end_src
