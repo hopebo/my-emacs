@@ -53,12 +53,18 @@
 
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
 
-  ;; Disable automatically deleting trailing whitespace
-  (defun disable-deleting-trailing-whitespace ()
+  ;; Toggle automatically deleting trailing whitespace
+  (defun toggle-deleting-trailing-whitespace ()
     (interactive)
-    (remove-hook 'before-save-hook 'delete-trailing-whitespace))
+    (if (member 'delete-trailing-whitespace before-save-hook)
+      (progn
+        (remove-hook 'before-save-hook 'delete-trailing-whitespace)
+        (message "Toggle off delete-trailing-whitespace"))
+      (progn
+        (add-hook 'before-save-hook 'delete-trailing-whitespace)
+        (message "Toggle on delete-trailing-whitespace"))))
 
-  (global-set-key (kbd "C-c w") 'disable-deleting-trailing-whitespace)
+  (global-set-key (kbd "C-c w") 'toggle-deleting-trailing-whitespace)
 #+end_src
 * Common
 #+begin_src emacs-lisp
@@ -424,6 +430,38 @@ A little enhancement for some built-in Emacs functions.
     ;; ivy has a sort function list to provide sort method's to functions.
     (map-put ivy-sort-functions-alist #'counsel-M-x #'string-lessp))
 #+end_src
+* Helm
+#+begin_comment
+An incremental completion and selection narrowing framework.
+Powerful enough to replace the functions of Ivy and Counsel.
+#+end_comment
+#+begin_src emacs-lisp
+  (use-package helm
+    :ensure t
+    :custom
+    (helm-split-window-inside-p t)
+    (helm-ff-file-name-history-use-recentf t)
+    :bind (("M-x" . 'helm-M-x)
+           ("M-y" . 'helm-show-kill-ring)
+           ("C-x C-f" . 'helm-find-files)
+           ("C-x b" . 'helm-mini))
+    :config
+    (helm-autoresize-mode t)
+    (helm-mode t))
+
+  (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+  ;; `C-c h m` run man
+  (global-set-key (kbd "C-c h") 'helm-command-prefix)
+  (global-unset-key (kbd "C-x c"))
+
+  ;; Interactive search with ag(Silver Searcher)
+  (use-package helm-ag
+    :ensure t
+    ;; `C-c C-f` follow search result mode
+    :bind (("C-c C-r" . 'helm-do-ag)
+           ("C-c C-g" . 'helm-do-ag-project-root)))
+#+end_src
 * Projectile
 #+begin_comment
 Project files' management. Do everything in a project view.
@@ -460,26 +498,12 @@ Quickly jump to the position on screen beginning with specific character.
 #+end_src
 * Smart Mode Line
 #+begin_src emacs-lisp
-;; smart-mode-line's dependency
-(use-package rich-minority)
-(require 'smart-mode-line)
-(setq sml/no-confirm-load-theme t)
-(setq sml/theme 'respectful)
-(sml/setup)
-#+end_src
-* Search
-#+begin_src emacs-lisp
-;; Ag(silver searcher)
-;; Projectile integrated key is `C-c p s s`
-(use-package ag
-  :ensure t
-  :custom
-  (ag-highlight-search t)
-  (ag-reuse-buffers t)) ;; Use the same buffer to display results
-
-(use-package wgrep
-;; Edit in search buffer and apply to files
-  :ensure t) ;; wgrep-change-to-wgrep-mode
+  ;; smart-mode-line's dependency
+  (use-package rich-minority)
+  (require 'smart-mode-line)
+  (setq sml/no-confirm-load-theme t)
+  (setq sml/theme 'respectful)
+  (sml/setup)
 #+end_src
 * Git timemachine
 #+begin_src emacs-lisp
@@ -519,11 +543,6 @@ Quickly jump to the position on screen beginning with specific character.
 (global-set-key (kbd "<f9>") 'mysql-local)
 #+end_src
 * Other Manually Packages
-** Browse Kill Ring
-#+begin_src emacs-lisp
-(require 'browse-kill-ring)
-(global-set-key (kbd "M-y") 'browse-kill-ring)
-#+end_src
 ** Solarized Theme
 #+begin_src emacs-lisp
 ;; Load solarized theme
