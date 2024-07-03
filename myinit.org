@@ -573,12 +573,28 @@ Quickly jump to the position on screen beginning with specific character.
     (interactive)
     (if (vc-root-dir) (setq root-dir (vc-root-dir))
       (setq root-dir default-directory))
-    (setq build-direc (concat root-dir "build-Debug"))
-    (if (file-exists-p build-direc)
-        (cd build-direc))
-    ;; If Makefile exists in current directory, use make command
-    (if (file-exists-p "Makefile")
-        (setq compile-command "mold -run make -j32 mysqld")
+
+    (setq build-path-options '())
+    (setq build-path nil)
+
+    ;; Find directory in which makefile exists
+    (let ((files (directory-files root-dir t "^build\\|^\\.")))
+      (dolist (direc-path files)
+        (if (file-exists-p (concat direc-path "/Makefile"))
+            (setq build-path-options (cons direc-path build-path-options)))))
+
+    (if (> (length build-path-options) 1)
+        (progn
+          ;; Prompt user to select a choice from list
+          (setq build-path (completing-read "Choose directory to build: " build-path-options nil t)))
+      (if (= (length build-path-options) 1)
+          (setq build-path (car build-path-options)))) ;; Choose the first option in list
+
+    (if (not (null build-path))
+        (progn
+          (cd build-path)
+          (message "Makefile at %s" build-path)
+          (setq compile-command "mold -run make -j32 mysqld"))
       (setq compile-command (concat "g++ -std=c++11 -g " buffer-file-name)))
     (compile compile-command))
 
