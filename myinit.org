@@ -248,6 +248,8 @@
 * Undo tree
 #+begin_src emacs-lisp
   (use-package undo-tree)
+  ;; Prevent undo tree files from polluting your git repo
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
   ;; C-/ undo; M-_ redo; C-x u visulaize.
   (global-undo-tree-mode t)
 #+end_src
