@@ -7,5 +7,5 @@
  '(helm-selection ((t (:foreground "yellow" :background "black" :inherit region))))
  '(iedit-occurrence ((t (:inherit nil :background "white"))))
  '(org-todo ((t (:background "red" :foreground "cyan" :weight bold))))
- '(whitespace-indentation ((t (:foreground "cyan")))))
+ '(whitespace-tab ((t (:foreground "brightgreen")))))
 ;;; custom.el ends here

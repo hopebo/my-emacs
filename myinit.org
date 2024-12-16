@@ -3,8 +3,6 @@
   ;; Increase garbage collection threshold to accelerate startup
   (setq gc-cons-threshold 64000000)
 
-  ;; Change TAB key behavior to insert spaces instead
-  (setq-default indent-tabs-mode nil)
   ;; Set number of spaces for c/c++ source file
   (setq c-basic-offset 2)
   ;; For a buffer-local variable, setq can only apply to current buffer,
@@ -24,6 +22,25 @@
 
   ;; Remove trailing whitespaces
   (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  (setq deleting-trailing-whitespace-switch t)
+  ;; Toggle automatically deleting trailing whitespace
+  (defun toggle-deleting-trailing-whitespace ()
+    (interactive)
+    (if deleting-trailing-whitespace-switch
+      (progn
+        (remove-hook 'before-save-hook 'delete-trailing-whitespace)
+        (setq deleting-trailing-whitespace-switch nil)
+        (message "Toggle off delete-trailing-whitespace"))
+      (progn
+        (add-hook 'before-save-hook 'delete-trailing-whitespace)
+        (setq deleting-trailing-whitespace-switch t)
+        (message "Toggle on delete-trailing-whitespace"))))
+
+  (global-set-key (kbd "C-c w") 'toggle-deleting-trailing-whitespace)
+
+  ;; Change TAB key behavior to insert spaces instead
+  (setq-default indent-tabs-mode nil)
+
   ;; More powerful automatic adjustments according to whitespace-style
   ;; variable, which may influence leading whitespaces.
   ;; (add-hook 'before-save-hook 'whitespace-cleanup)
@@ -52,19 +69,6 @@
   (global-set-key (kbd "<f5>") 'refresh-file)
 
   (global-set-key (kbd "C-x k") 'kill-this-buffer)
-
-  ;; Toggle automatically deleting trailing whitespace
-  (defun toggle-deleting-trailing-whitespace ()
-    (interactive)
-    (if (member 'delete-trailing-whitespace before-save-hook)
-      (progn
-        (remove-hook 'before-save-hook 'delete-trailing-whitespace)
-        (message "Toggle off delete-trailing-whitespace"))
-      (progn
-        (add-hook 'before-save-hook 'delete-trailing-whitespace)
-        (message "Toggle on delete-trailing-whitespace"))))
-
-  (global-set-key (kbd "C-c w") 'toggle-deleting-trailing-whitespace)
 #+end_src
 * Common
 #+begin_src emacs-lisp
@@ -89,6 +93,35 @@
       c-mode-hook
       c++-mode-hook
       python-mode-hook))
+
+  (defun infer-indentation-style ()
+    ;; if our source file uses tabs, we use tabs, if spaces spaces, and if
+    ;; neither, we use the current indent-tabs-mode
+    (let ((space-count (how-many "^  " (point-min) (point-max)))
+          (tab-count (how-many "^\t" (point-min) (point-max))))
+      (if (> tab-count space-count)
+            (progn
+              (setq indent-tabs-mode nil)
+              (local-set-key (kbd "TAB") 'self-insert-command)
+              ;; Indentation offset equals one TAB
+              (setq c-basic-offset 4)
+
+              ;; We're changing the value of variable c-offsets-alist to change indentation behavior
+              ;; Make substatement block following if/while
+              (c-set-offset 'substatement-open 0)
+              ;; Make case statement indent
+              (c-set-offset 'case-label '+)
+
+              (message "infer indent-tabs-mode enabled")))))
+
+  (defun infer-trailing-whitespace-style ()
+    (setq disable-threshold 5)
+    (let ((trail-space-count (how-many " $" (point-min) (point-max))))
+      (if (> trail-space-count disable-threshold)
+            (toggle-deleting-trailing-whitespace))))
+
+  (add-hook 'c-mode-common-hook 'infer-indentation-style)
+  (add-hook 'c-mode-common-hook 'infer-trailing-whitespace-style)
 #+end_src
 * Interface Tweak
 #+begin_src emacs-lisp
@@ -111,7 +144,7 @@
 
   ;; Remove tab-mark if TAB is generally used in a project.
   (setq whitespace-style '(face tabs trailing lines space-before-tab
-    indentation empty space-after-tab tab-mark))
+    empty space-after-tab tab-mark))
 #+end_src
 * Package Archives
 #+begin_src emacs-lisp
@@ -596,9 +629,17 @@ Quickly jump to the position on screen beginning with specific character.
         (progn
           (cd build-path)
           (message "Makefile at %s" build-path)
-          (setq compile-command "mold -run make -j32 mysqld"))
+          (setq compile-command "make -j16"))
       (setq compile-command (concat "g++ -std=c++11 -g " buffer-file-name)))
     (compile compile-command))
+
+  (defun apg-compile-func()
+    (interactive)
+    (setq compile-command "brazil-build rebuild")
+    (compile compile-command)
+    (shell-command "python /local/home/zboli/tmp/test.py"))
+
+  (global-set-key (kbd "<f12>") 'apg-compile-func)
 
   (global-set-key (kbd "<f10>") 'my-compile-func)
 #+end_src
