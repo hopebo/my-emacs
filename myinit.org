@@ -77,22 +77,10 @@
     ;; Highlight trailing whitespaces and exceeding part
     ;; when lines are longer than whitespace-line-column
     (setq show-trailing-whitespace t)
-    ;; If we want to tolerate projects with particularly long lines of code,
-    ;; set the following variable to a bigger number.
-    ;; (setq whitespace-line-column 200)
     ;; Auto-fill when current line is longer than 80 characters
     (setq fill-column 80)
     (setq auto-fill-function 'do-auto-fill)
-    (whitespace-mode t))
-
-  (defun add-multiple-hooks (hook-function hooks)
-    (mapc (lambda (hook) (add-hook hook hook-function)) hooks))
-
-  (add-multiple-hooks 'coding-mode
-    '(sh-mode-hook
-      c-mode-hook
-      c++-mode-hook
-      python-mode-hook))
+   (whitespace-mode t))
 
   (defun infer-indentation-style ()
     ;; if our source file uses tabs, we use tabs, if spaces spaces, and if
@@ -101,7 +89,7 @@
           (tab-count (how-many "^\t" (point-min) (point-max))))
       (if (> tab-count space-count)
             (progn
-              (setq indent-tabs-mode nil)
+              (setq indent-tabs-mode t)
               (local-set-key (kbd "TAB") 'self-insert-command)
               ;; Indentation offset equals one TAB
               (setq c-basic-offset 4)
@@ -120,8 +108,30 @@
       (if (> trail-space-count disable-threshold)
             (toggle-deleting-trailing-whitespace))))
 
-  (add-hook 'c-mode-common-hook 'infer-indentation-style)
-  (add-hook 'c-mode-common-hook 'infer-trailing-whitespace-style)
+  (defun infer-line-length-style ()
+    (setq disable-threshold 5)
+     (if (> (count-matches "^.\\{80\\}." (point-min) (point-max)) disable-threshold)
+        ;; If we want to tolerate projects with particularly long lines of code,
+        ;; set the following variable to a bigger number.
+        (setq whitespace-line-column 2000)))
+
+  (defun add-functions-to-hooks (functions hooks)
+    "Add each function in FUNCTIONS to each hook in HOOKS."
+    (mapc (lambda (fn)
+            (mapc (lambda (hook)
+                    (add-hook hook fn))
+                  hooks))
+          functions))
+
+  (add-functions-to-hooks
+   '(coding-mode
+     infer-indentation-style
+     infer-trailing-whitespace-style
+     infer-line-length-style)
+   '(sh-mode-hook
+     c-mode-hook
+     c++-mode-hook
+     python-mode-hook))
 #+end_src
 * Interface Tweak
 #+begin_src emacs-lisp
