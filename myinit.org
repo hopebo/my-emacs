@@ -38,7 +38,6 @@
 
   (global-set-key (kbd "C-c w") 'toggle-deleting-trailing-whitespace)
 
-  ;; Change TAB key behavior to insert spaces instead
   (setq-default indent-tabs-mode nil)
 
   ;; More powerful automatic adjustments according to whitespace-style
@@ -82,25 +81,27 @@
     (setq auto-fill-function 'do-auto-fill)
    (whitespace-mode t))
 
+  (defun pg-coding-style ()
+    (interactive)
+    (setq indent-tabs-mode t)
+    (local-set-key (kbd "TAB") 'self-insert-command)
+    ;; Indentation offset equals one TAB
+    (setq c-basic-offset 4)
+
+    ;; We're changing the value of variable c-offsets-alist to change indentation behavior
+    ;; Make substatement block following if/while
+    (c-set-offset 'substatement-open 0)
+    ;; Make case statement indent
+    (c-set-offset 'case-label '+)
+    (message "pg coding style enabled"))
+
   (defun infer-indentation-style ()
     ;; if our source file uses tabs, we use tabs, if spaces spaces, and if
     ;; neither, we use the current indent-tabs-mode
     (let ((space-count (how-many "^  " (point-min) (point-max)))
           (tab-count (how-many "^\t" (point-min) (point-max))))
-      (if (> tab-count space-count)
-            (progn
-              (setq indent-tabs-mode t)
-              (local-set-key (kbd "TAB") 'self-insert-command)
-              ;; Indentation offset equals one TAB
-              (setq c-basic-offset 4)
-
-              ;; We're changing the value of variable c-offsets-alist to change indentation behavior
-              ;; Make substatement block following if/while
-              (c-set-offset 'substatement-open 0)
-              ;; Make case statement indent
-              (c-set-offset 'case-label '+)
-
-              (message "infer indent-tabs-mode enabled")))))
+      (if (>= tab-count space-count)
+            (pg-coding-style))))
 
   (defun infer-trailing-whitespace-style ()
     (setq disable-threshold 5)
@@ -352,7 +353,7 @@
       (lsp-headerline-breadcrumb-enable nil)
       (lsp-server-trace "verbose")
       (lsp-clients-clangd-args
-       '("-j=32" "-background-index" "-log=verbose"
+       '("-j=48" "-background-index" "-log=verbose"
          "-all-scopes-completion" "-suggest-missing-includes")))
     (add-hook 'c-mode-common-hook #'lsp-deferred)
 
